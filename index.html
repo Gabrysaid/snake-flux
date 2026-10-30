@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snake Flux</title>
+<meta name="description" content="Snake Flux: el Snake de siempre con biomas, jefes, evolución, poderes y duelos para 2 jugadores. Descárgalo gratis para Windows.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Un solo mundo visual: el tablero del juego. Papel cálido, cuadrícula de puntos, la serpiente verde azulado como acento.
+     Layout: columnas de 1120px; cada sección es un "tablero" con su propia cuadrícula de puntos. */
+  :root{
+    --paper:#f3f1ec;
+    --board:#fbfaf7;
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e6e2da;
+    --teal:#2a9d8f;
+    --teal-deep:#1b4b5a;
+    --dot:#e2ddd2;
+    --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:8px}
+  .wrap{width:min(1120px, calc(100% - 32px));margin:0 auto}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.02;text-wrap:balance}
+  h2{font-size:clamp(34px,5vw,56px);font-weight:800}
+  h3{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:flex;align-items:center;gap:10px}
+  .kicker::before{content:"";width:22px;height:10px;border-radius:99px;background:var(--teal)}
+  .lead{font-size:19px;color:#4b5563;max-width:60ch}
+  .dots{background-color:var(--board);background-image:radial-gradient(var(--dot) 1.2px, transparent 1.3px);background-size:24px 24px;background-position:12px 12px}
+
+  /* ---------- nav ---------- */
+  nav{position:sticky;top:0;z-index:20;background:rgba(243,241,236,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .2s}
+  nav.scrolled{border-bottom-color:var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:21px;text-decoration:none;letter-spacing:-.02em}
+  .logo em{font-style:normal;color:var(--teal)}
+  .navlinks{display:flex;gap:24px;font-size:15px;font-weight:600}
+  .navlinks a{text-decoration:none;color:#4b5563}
+  .navlinks a:hover{color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;gap:10px;border:none;border-radius:14px;padding:13px 20px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;text-decoration:none;transition:transform .15s, box-shadow .15s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.primary{background:var(--ink);color:#fff;box-shadow:0 10px 26px rgba(31,41,51,.18)}
+  .btn.primary .ico{width:26px;height:26px;border-radius:8px;background:var(--teal);display:grid;place-items:center}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .btn.small{padding:9px 14px;font-size:14px;border-radius:11px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:56px 0 40px}
+  .hero .wrap{display:grid;grid-template-columns:1.02fr 1fr;gap:48px;align-items:center}
+  .hero h1{font-size:clamp(52px,8vw,104px);font-weight:800;line-height:.92;letter-spacing:-.045em}
+  .hero h1 .flux{color:var(--teal);display:inline-block}
+  .hero h1 .small{display:block;font-size:.34em;letter-spacing:-.02em;line-height:1.15;font-weight:700;color:#4b5563;margin-top:14px}
+  .hero .lead{margin:22px 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .meta{font-size:13.5px;color:var(--muted);margin-top:14px;display:flex;gap:14px;flex-wrap:wrap}
+  .meta span{display:inline-flex;align-items:center;gap:6px}
+  .meta i{width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block}
+  .stage{position:relative}
+  .boardframe{border-radius:24px;padding:14px;background:#fff;box-shadow:0 30px 60px rgba(31,41,51,.12),0 2px 0 rgba(31,41,51,.04);transform:rotate(1.2deg)}
+  .hud{display:flex;justify-content:space-between;align-items:center;padding:2px 6px 10px;font-variant-numeric:tabular-nums}
+  .hud small{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .hud b{font-family:var(--display);font-size:24px;font-weight:800}
+  .pill{font-size:12px;font-weight:800;background:var(--teal);color:#fff;border-radius:99px;padding:3px 9px;margin-left:8px;vertical-align:4px}
+  #demo{display:block;width:100%;aspect-ratio:4/3;border-radius:16px}
+  .sticker{position:absolute;font-family:var(--display);font-weight:800;font-size:15px;background:var(--ink);color:#fff;padding:8px 14px;border-radius:99px;box-shadow:0 10px 24px rgba(31,41,51,.2)}
+  .sticker.s1{left:-18px;bottom:46px;transform:rotate(-5deg)}
+  .sticker.s2{right:-10px;top:-14px;background:#fff;color:var(--ink);border:1px solid var(--line);transform:rotate(4deg)}
+
+  /* ---------- números ---------- */
+  .facts{padding:26px 0 8px}
+  .facts .wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .fact{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+  .fact b{font-family:var(--display);font-size:40px;font-weight:800;line-height:1;display:block;font-variant-numeric:tabular-nums}
+  .fact span{font-size:14px;color:var(--muted)}
+
+  section.block{padding:84px 0 20px}
+  .head{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:end;margin-bottom:34px}
+  .head .lead{justify-self:end}
+
+  /* ---------- básicos ---------- */
+  .basics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
+  .card p{font-size:15.5px;color:#4b5563}
+  .card canvas{width:100%;height:120px;border-radius:14px;display:block}
+  .card .tag{align-self:flex-start;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:#f1efe9;color:#4b5563}
+  .mults{display:flex;gap:6px;flex-wrap:wrap}
+  .mults span{font-size:13px;font-weight:700;border-radius:99px;padding:3px 10px;background:#e6fcf5;color:#0b7285;font-variant-numeric:tabular-nums}
+
+  /* ---------- evolución ---------- */
+  .evo{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden}
+  .evo > div{padding:22px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--line);position:relative}
+  .evo > div:last-child{border-right:none}
+  .evo canvas{width:100%;height:110px;display:block}
+  .evo .xp{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .evo p{font-size:15px;color:#4b5563}
+  .evo .ab{font-size:14px;font-weight:700}
+  .evo > div:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:62px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px;z-index:2}
+
+  /* ---------- biomas ---------- */
+  .biomes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .biome{border-radius:24px;overflow:hidden;border:1px solid var(--line);background:#fff;display:flex;flex-direction:column}
+  .biome canvas{width:100%;height:190px;display:block}
+  .biome .bd{padding:20px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .biome .row{display:flex;justify-content:space-between;align-items:center}
+  .stars{color:#f59f00;letter-spacing:2px;font-size:15px}
+  .biome ul{list-style:none;display:flex;flex-direction:column;gap:7px;font-size:15px;color:#4b5563}
+  .biome li{display:flex;gap:9px}
+  .biome li b{color:var(--ink)}
+  .bonus{font-size:12px;font-weight:800;color:#e8590c;background:#fff4e6;border-radius:99px;padding:3px 10px}
+
+  /* ---------- villanos ---------- */
+  .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .tab{border:1px solid var(--line);background:#fff;border-radius:99px;padding:9px 16px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .ladder{display:grid;grid-template-columns:repeat(4,1fr) 1.1fr;gap:12px}
+  .lv{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px}
+  .lv canvas{width:100%;height:120px;display:block;border-radius:14px}
+  .lv .n{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+  .lv h3{font-size:19px}
+  .lv .hp{color:#e5484d;letter-spacing:2px;font-size:14px}
+  .lv p{font-size:14px;color:#4b5563}
+  .minion{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .minion p,.minion .n{color:#c9cdd3}
+  .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .rule{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:15px;color:#4b5563}
+  .rule b{color:var(--ink);display:block}
+  .rule .sw{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+  /* ---------- modos ---------- */
+  .modes{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  .mode{border-radius:24px;padding:26px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+  .mode.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .mode.dark p,.mode.dark li{color:#c9cdd3}
+  .mode ul{list-style:none;display:grid;gap:8px;font-size:15.5px;color:#4b5563}
+  .mode li{display:flex;gap:10px}
+  .mode li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:9px;flex-shrink:0}
+  .duels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .duels div{border:1px solid #3b4652;border-radius:14px;padding:12px;font-size:14px}
+  .duels b{display:block;color:#fff;font-size:15px}
+  .keys{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .kb{border:1px solid #3b4652;border-radius:16px;padding:14px}
+  .kb .who{font-weight:800;font-size:14px;margin-bottom:8px}
+  .kb .grid{display:grid;grid-template-columns:repeat(3,38px);gap:5px;margin-bottom:8px}
+  kbd{font-family:var(--body);display:inline-grid;place-items:center;min-width:38px;height:36px;padding:0 8px;border-radius:9px;background:#2b3540;border:1px solid #46525e;border-bottom-width:3px;color:#fff;font-size:13px;font-weight:700}
+  .kb small{font-size:13px;color:#c9cdd3}
+  .soon{display:flex;gap:16px;align-items:center;background:#fff;border:1px dashed #cfc9bc;border-radius:20px;padding:18px 22px;margin-top:16px}
+  .soon .t{font-size:12px;font-weight:800;background:#fff4e6;color:#e67700;border-radius:99px;padding:3px 10px}
+
+  /* ---------- descarga ---------- */
+  .dl{margin:90px auto 0;border-radius:32px;padding:46px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;border:1px solid var(--line)}
+  .dl h2{font-size:clamp(38px,5.5vw,64px)}
+  .steps{list-style:none;display:grid;gap:12px;counter-reset:s}
+  .steps li{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px 16px 62px;position:relative;font-size:15.5px;color:#4b5563;counter-increment:s}
+  .steps li::before{content:counter(s);position:absolute;left:16px;top:15px;width:32px;height:32px;border-radius:10px;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:800}
+  .steps b{color:var(--ink);display:block}
+  .req{font-size:13.5px;color:var(--muted);margin-top:16px}
+  .safe{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:#4b5563;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:16px}
+
+  footer{padding:56px 0 46px;color:var(--muted);font-size:14px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:24px}
+
+  @media (max-width: 900px){
+    .hero .wrap,.head,.modes,.dl{grid-template-columns:1fr}
+    .head .lead{justify-self:start}
+    .facts .wrap{grid-template-columns:repeat(3,1fr)}
+    .basics,.biomes,.rules{grid-template-columns:1fr 1fr}
+    .evo{grid-template-columns:1fr 1fr}
+    .evo > div:nth-child(2){border-right:none}
+    .evo > div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+    .evo > div::after{display:none}
+    .ladder{grid-template-columns:1fr 1fr}
+    .navlinks{display:none}
+    .dl{padding:28px}
+  }
+  @media (max-width: 560px){
+    .facts .wrap,.basics,.biomes,.rules,.evo,.ladder,.duels,.keys{grid-template-columns:1fr}
+    .evo > div{border-right:none;border-bottom:1px solid var(--line)}
+    .sticker{display:none}
+    .boardframe{transform:none}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .btn,.btn:hover{transition:none;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Snake Flux, inicio">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="8" fill="#fbfaf7" stroke="#e6e2da"/><path d="M7 22v-7h11v-5" fill="none" stroke="#2a9d8f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="8.5" r="4" fill="#1b4b5a"/><circle cx="23.5" cy="22" r="3" fill="#6cbf4a"/></svg>
+      Snake <em>Flux</em>
+    </a>
+    <div class="navlinks">
+      <a href="#juego">El juego</a><a href="#biomas">Biomas</a><a href="#villanos">Villanos</a><a href="#modos">Modos</a>
+    </div>
+    <a class="btn primary small" href="#descargar">Descargar</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <h1>Snake <span class="flux">Flux</span><span class="small">La de siempre. Pero ahora el mapa pelea contra ti.</span></h1>
+      <p class="lead">Comes manzanas y creces, igual que siempre. Solo que ahora hay portales, poderes, tres biomas, jefes que evolucionan cada vez que los vences y duelos contra tu amigo en el mismo teclado.</p>
+      <div class="cta">
+        <a class="btn primary" id="dlTop" href="#descargar"><span class="ico"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v8M3.5 6 7 9.5 10.5 6M2 12.5h10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Descargar para Windows</a>
+        <a class="btn ghost" href="#juego">Ver cómo se juega</a>
+      </div>
+      <div class="meta"><span><i></i>Gratis</span><span><i></i>Windows 10 y 11</span><span><i></i>84 MB</span><span><i></i>Versión 1.1</span></div>
+    </div>
+    <div class="stage">
+      <div class="boardframe">
+        <div class="hud" aria-hidden="true">
+          <div><small>Puntos</small><b id="dScore">0</b><span class="pill" id="dMult">x1</span></div>
+          <div style="text-align:right"><small>Récord</small><b id="dBest">0</b></div>
+        </div>
+        <canvas id="demo" aria-label="Demostración animada: una serpiente recorre el tablero comiendo manzanas y cruzando portales"></canvas>
+      </div>
+      <span class="sticker s1">¡Juega solo! 👀</span>
+      <span class="sticker s2">🐉 4 evoluciones</span>
+    </div>
+  </div>
+</header>
+
+<div class="facts">
+  <div class="wrap">
+    <div class="fact"><b>3</b><span>biomas con reglas propias</span></div>
+    <div class="fact"><b>12</b><span>jefes en 3 familias</span></div>
+    <div class="fact"><b>4</b><span>etapas de evolución</span></div>
+    <div class="fact"><b>27</b><span>logros, 4 secretos</span></div>
+    <div class="fact"><b>2</b><span>jugadores, un teclado</span></div>
+  </div>
+</div>
+
+<section class="block" id="juego">
+  <div class="wrap">
+    <div class="head">
+      <div><p class="kicker">Lo básico</p><h2>Simple de aprender. Difícil de soltar.</h2></div>
+      <p class="lead">Si ya jugaste Snake, ya sabes jugar Snake Flux. Todo lo nuevo se explica solo en cuanto aparece.</p>
+    </div>
+    <div class="basics">
+      <div class="card"><canvas data-art="apple"></canvas><h3>Más largo, más puntos</h3><p>Cada manzana te hace crecer. Mientras más larga tu serpiente, más vale todo lo que comes.</p><div class="mults"><span>8 → x1.5</span><span>14 → x2</span><span>20 → x2.5</span><span>26 → x3</span></div></div>
+      <div class="card"><canvas data-art="powers"></canvas><h3>Manzanas con poderes</h3><p><b style="color:#4c8bf5">Azul</b>: cámara lenta. <b style="color:#9b5de5">Morada</b>: fantasma, atraviesas todo. <b style="color:#e5484d">Picante</b>: turbo y puntos dobles. Duran 5 segundos.</p></div>
+      <div class="card"><canvas data-art="portals"></canvas><h3>Portales y obstáculos</h3><p>Dos pares de portales fijos para cortar camino. Cada pocas manzanas aparece un obstáculo nuevo, siempre con aviso.</p></div>
+      <div class="card"><canvas data-art="scraps"></canvas><h3>Si te cortan, recupéralo</h3><p>Los pedazos de tu cola se quedan 6 segundos en el mapa. Regresa por ellos y recuperas largo y puntos.</p></div>
+      <div class="card"><canvas data-art="retos"></canvas><h3>3 retos cada partida</h3><p>"Come 15 manzanas", "Derrota al jefe", "Cruza 4 portales"… Cumple los tres y es <b>¡Partida perfecta!</b></p></div>
+      <div class="card"><canvas data-art="skins"></canvas><h3>Monedas y skins</h3><p>Ganas monedas jugando y con logros. Desbloquea Tigre, Neón, Arcoíris, Oro y más.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="evolucion">
+  <div class="wrap">
+    <div class="head">
+      <div><p class="kicker">Evolución</p><h2>Tu serpiente crece en serio.</h2></div>
+      <p class="lead">Ganas XP con manzanas, esbirros y jefes. Cada etapa desbloquea una habilidad nueva que no pierdes en toda la partida.</p>
+    </div>
+    <div class="evo">
+      <div><canvas data-art="stage0"></canvas><span class="xp">0 XP</span><h3>Cría</h3><p>Donde todo empieza. Sin habilidades, puro instinto.</p></div>
+      <div><canvas data-art="stage1"></canvas><span class="xp">8 XP</span><h3>Víbora</h3><p class="ab">🛡 Escudo</p><p>Aguanta un golpe que te habría matado y se recarga solo.</p></div>
+      <div><canvas data-art="stage2"></canvas><span class="xp">18 XP</span><h3>Cobra</h3><p class="ab">🐍 Escupir veneno</p><p>Destruye obstáculos, esbirros y disparos. Le quita vida al jefe.</p></div>
+      <div><canvas data-art="stage3"></canvas><span class="xp">32 XP</span><h3>Dragón</h3><p class="ab">🔥 A prueba de fuego</p><p>El fuego no te corta y tu escupitajo atraviesa todo. Puedes nadar en lava.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="biomas">
+  <div class="wrap">
+    <div class="head">
+      <div><p class="kicker">Biomas</p><h2>Tres mundos, tres maneras de morir.</h2></div>
+      <p class="lead">Eliges el bioma antes de jugar. Cada uno cambia una regla, trae su propio jefe y guarda su propio récord.</p>
+    </div>
+    <div class="biomes">
+      <article class="biome"><canvas data-art="b-pradera"></canvas><div class="bd">
+        <div class="row"><h3>🌿 Pradera</h3><span class="stars" aria-label="Dificultad 2 de 3">★★☆</span></div>
+        <ul><li>🌀<span><b>El clásico.</b> Portales, poderes y obstáculos.</span></li><li>🧙<span>Jefe: <b>el Brujo</b></span></li><li>💀<span>Esbirros: <b>zombis</b></span></li></ul>
+      </div></article>
+      <article class="biome"><canvas data-art="b-tundra"></canvas><div class="bd">
+        <div class="row"><h3>❄️ Tundra</h3><span class="stars" aria-label="Dificultad 2 de 3">★★☆</span></div>
+        <ul><li>🧊<span><b>Hielo:</b> sobre él no puedes girar. Te deslizas hasta salir.</span></li><li>👣<span>Jefe: <b>el Yeti</b>, lanza bolas de nieve</span></li><li>⛄<span>Esbirros: <b>muñecos de nieve</b>, más lentos</span></li></ul>
+      </div></article>
+      <article class="biome"><canvas data-art="b-volcan"></canvas><div class="bd">
+        <div class="row"><h3>🌋 Volcán</h3><span class="bonus">Puntos ×1.25</span></div>
+        <ul><li>🔥<span><b>Grietas de lava</b> que se encienden por turnos. Brillan antes de quemar.</span></li><li>🪨<span>Jefe: <b>el Golem de Magma</b>, dispara más seguido</span></li><li>😈<span>Esbirros: <b>diablillos</b></span></li></ul>
+        <div class="row"><span class="stars" aria-label="Dificultad 3 de 3">★★★</span><small style="color:var(--muted)">El más difícil</small></div>
+      </div></article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="villanos">
+  <div class="wrap">
+    <div class="head">
+      <div><p class="kicker">Villanos</p><h2>Lo vences. Regresa peor.</h2></div>
+      <p class="lead">Cada jefe tiene cuatro niveles. Chócalo con la cabeza o escúpele para quitarle vida. Cada vez que lo derrotas vuelve más fuerte.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Familia de jefes">
+      <button class="tab" role="tab" aria-selected="true" data-fam="pradera" id="tab-pradera">🌿 Brujo</button>
+      <button class="tab" role="tab" aria-selected="false" data-fam="tundra" id="tab-tundra">❄️ Yeti</button>
+      <button class="tab" role="tab" aria-selected="false" data-fam="volcan" id="tab-volcan">🌋 Golem</button>
+    </div>
+    <div class="ladder" id="ladder"></div>
+    <div class="rules">
+      <div class="rule"><span class="sw" style="background:#ff7a1a"></span><span><b>Todo ataque avisa</b>Antes de disparar marca su línea de fuego. Antes de invocar, aparece una tumba que parpadea.</span></div>
+      <div class="rule"><span class="sw" style="background:#2a9d8f"></span><span><b>Tu cabeza siempre gana</b>Si chocas un esbirro, lo eliminas (+15). Si él muerde tu cuerpo, te corta la cola.</span></div>
+      <div class="rule"><span class="sw" style="background:#e5484d"></span><span><b>Disparos</b>En la cabeza: mueres (salvo con escudo). En el cuerpo: te cortan desde ahí.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="modos">
+  <div class="wrap">
+    <div class="head">
+      <div><p class="kicker">Modos</p><h2>Solo o con alguien al lado.</h2></div>
+      <p class="lead">Juega solo para subir récords, o reta a un amigo en el mismo teclado. Puedes pausar, guardar y seguir otro día.</p>
+    </div>
+    <div class="modes">
+      <div class="mode dark">
+        <h3>👥 Duelo de 2 jugadores</h3>
+        <p>Si tu amigo choca con tu cuerpo, tú ganas +50. Escúpele para cortarle la cola. Choque de cabezas: pierden los dos.</p>
+        <div class="duels">
+          <div><b>⏱ 2 minutos</b>Más puntos gana</div>
+          <div><b>❤️ 3 vidas</b>El que se quede sin vidas pierde</div>
+          <div><b>💀 Muerte súbita</b>El primero que choca pierde</div>
+        </div>
+        <div class="keys">
+          <div class="kb"><div class="who" style="color:#63e6be">Jugador 1</div><div class="grid"><span></span><kbd>W</kbd><span></span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div><small><kbd>Q</kbd> o <kbd>Shift izq.</kbd> escupir</small></div>
+          <div class="kb"><div class="who" style="color:#faa2c1">Jugador 2</div><div class="grid"><span></span><kbd>↑</kbd><span></span><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div><small><kbd>Shift der.</kbd> o <kbd>Ctrl der.</kbd> escupir</small></div>
+        </div>
+      </div>
+      <div class="mode">
+        <h3>▶ Un jugador</h3>
+        <ul>
+          <li>Tres dificultades: Fácil (los bordes te pasan al otro lado), Normal y Difícil.</li>
+          <li>Récord separado por bioma, dificultad y con o sin enemigos.</li>
+          <li>27 logros de bronce, plata y oro. Cuatro son secretos.</li>
+          <li>Estadísticas de todas tus partidas.</li>
+          <li>Pausa con Esc. Si cierras a media partida, se guarda sola.</li>
+        </ul>
+        <p style="font-size:14px;color:var(--muted)">Controles: flechas o WASD para moverte, F o Q para escupir, Esc para pausar, M para el sonido.</p>
+      </div>
+    </div>
+    <div class="soon"><span style="font-size:30px">🏟️</span><div><b>Arena: battle royale contra bots</b><div style="font-size:15px;color:#4b5563">Tú contra cinco serpientes con IA mientras el mapa se cierra. Último en pie gana.</div></div><span class="t" style="margin-left:auto">Próximamente</span></div>
+  </div>
+</section>
+
+<section class="wrap" id="descargar">
+  <div class="dl dots">
+    <div>
+      <p class="kicker">Descarga gratis</p>
+      <h2 style="margin:10px 0 16px">Instálalo y juega en un minuto.</h2>
+      <p class="lead" style="font-size:17px">Se instala como cualquier juego: queda en tu escritorio y en el menú Inicio. Tus récords, monedas y logros se guardan en tu computadora.</p>
+      <div class="cta" style="margin-top:22px">
+        <a class="btn primary" id="dlMain" href="https://github.com/Gabrysaid/snake-flux/releases/latest/download/SnakeFlux-Instalador.exe" rel="noopener"><span class="ico"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v8M3.5 6 7 9.5 10.5 6M2 12.5h10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Descargar Snake Flux</a>
+      </div>
+      <p class="req">SnakeFlux-Instalador.exe · 84 MB · Windows 10 u 11 de 64 bits · Versión 1.1</p>
+    </div>
+    <div>
+      <ol class="steps">
+        <li><b>Descarga el instalador</b>Se guarda en tu carpeta de Descargas.</li>
+        <li><b>Ábrelo</b>Si Windows muestra "Windows protegió tu PC", da clic en <b style="display:inline">Más información</b> y luego en <b style="display:inline">Ejecutar de todas formas</b>. Sale porque es un juego independiente, sin firma de una empresa grande.</li>
+        <li><b>Sigue los pasos y juega</b>Al terminar queda el ícono en tu escritorio. Para desinstalarlo: Configuración → Aplicaciones.</li>
+      </ol>
+      <div class="safe"><span>🔒</span><span>Descarga solo desde esta página. Si un amigo te pasa el archivo por otro lado, pídele este link.</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Snake Flux · hecho por Gabriel Vera · 2026</span>
+    <span>Pronto también en el teléfono.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const rr = (c,x,y,w,h,r) => { c.beginPath(); c.roundRect ? c.roundRect(x,y,w,h,r) : c.rect(x,y,w,h); };
+  const lerpHex = (a,b,t) => { const p=a.match(/\w\w/g).map(h=>parseInt(h,16)), q=b.match(/\w\w/g).map(h=>parseInt(h,16)); return 'rgb('+p.map((v,i)=>Math.round(v+(q[i]-v)*t)).join(',')+')'; };
+
+  document.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 8), { passive:true });
+
+  // ---------- Piezas de dibujo (mismo estilo que el juego) ----------
+  function grid(c, W, H, S, bg, dot){
+    c.fillStyle = bg; c.fillRect(0,0,W,H);
+    c.fillStyle = dot;
+    for(let y=S; y<H; y+=S) for(let x=S; x<W; x+=S){ c.beginPath(); c.arc(x,y,1.1,0,7); c.fill(); }
+  }
+  function snake(c, pts, S, head, tail, opt={}){
+    c.lineCap='round'; c.lineJoin='round';
+    const L = pts.length;
+    for(let i=L-1;i>0;i--){
+      const k = i/(L-1||1);
+      c.strokeStyle = lerpHex(head, tail, k); c.lineWidth = S*(.74-k*.22);
+      c.beginPath(); c.moveTo(pts[i][0]*S+S/2, pts[i][1]*S+S/2); c.lineTo(pts[i-1][0]*S+S/2, pts[i-1][1]*S+S/2); c.stroke();
+    }
+    const [hx,hy] = [pts[0][0]*S+S/2, pts[0][1]*S+S/2];
+    const dx = Math.sign(pts[0][0]-pts[1][0]), dy = Math.sign(pts[0][1]-pts[1][1]);
+    const qx = -dy, qy = dx, bx = -dx, by = -dy;
+    if(opt.hood){ c.fillStyle='#9775fa'; c.beginPath(); c.ellipse(hx+bx*S*.18, hy+by*S*.18, S*(dx?.32:.78), S*(dx?.78:.32), 0, 0, 7); c.fill(); c.fillStyle='#e5dbff'; c.beginPath(); c.ellipse(hx+bx*S*.18, hy+by*S*.18, S*(dx?.14:.5), S*(dx?.5:.14), 0, 0, 7); c.fill(); }
+    c.fillStyle = '#'+head; c.beginPath(); c.arc(hx,hy,S*(opt.horns?.46:.42),0,7); c.fill();
+    if(opt.horns){ c.fillStyle='#ffd43b'; c.strokeStyle='#e67700'; c.lineWidth=1;
+      [-1,1].forEach(sd => { c.beginPath(); c.moveTo(hx+bx*S*.05+qx*sd*S*.3, hy+by*S*.05+qy*sd*S*.3); c.lineTo(hx+bx*S*.6+qx*sd*S*.62, hy+by*S*.6+qy*sd*S*.62); c.lineTo(hx+bx*S*.32+qx*sd*S*.16, hy+by*S*.32+qy*sd*S*.16); c.closePath(); c.fill(); c.stroke(); }); }
+    if(opt.shield){ c.strokeStyle='rgba(116,192,252,.85)'; c.lineWidth=2; c.beginPath(); c.arc(hx,hy,S*.62,0,7); c.stroke(); }
+    [-1,1].forEach(sd => { const ox = hx+dx*S*.12+qx*sd*S*.17, oy = hy+dy*S*.12+qy*sd*S*.17;
+      c.fillStyle='#fff'; c.beginPath(); c.arc(ox,oy,S*.1,0,7); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(ox+dx*S*.04,oy+dy*S*.04,S*.05,0,7); c.fill(); });
+  }
+  function apple(c, x, y, S, col='#6cbf4a', ring){
+    const cx = x*S+S/2, cy = y*S+S/2;
+    if(ring){ c.fillStyle = col+'2a'; c.beginPath(); c.arc(cx,cy,S*.55,0,7); c.fill(); }
+    c.fillStyle = col; c.beginPath(); c.arc(cx,cy+1,S*.34,0,7); c.fill();
+    c.fillStyle='rgba(255,255,255,.45)'; c.beginPath(); c.arc(cx-S*.11,cy-S*.09,S*.08,0,7); c.fill();
+    if(!ring){ c.strokeStyle='#6b4f2a'; c.lineWidth=1.8; c.lineCap='round'; c.beginPath(); c.moveTo(cx,cy-S*.29); c.lineTo(cx+S*.05,cy-S*.43); c.stroke();
+      c.fillStyle='#3f8f2f'; c.beginPath(); c.ellipse(cx+S*.15,cy-S*.37,S*.11,S*.05,-.5,0,7); c.fill(); }
+  }
+  function portal(c, x, y, S, col, rot=0){
+    const cx=x*S+S/2, cy=y*S+S/2;
+    c.fillStyle = col+'22'; c.beginPath(); c.arc(cx,cy,S*.5,0,7); c.fill();
+    c.strokeStyle = col; c.lineWidth = 2.2; c.lineCap='round';
+    for(let k=0;k<3;k++){ c.beginPath(); c.arc(cx,cy,S*.36,rot+k*2.094,rot+k*2.094+1.3); c.stroke(); }
+    c.fillStyle = col; c.beginPath(); c.arc(cx,cy,S*.13,0,7); c.fill();
+  }
+  function boss(c, cx, cy, S, kind, L, lvl, phase){
+    const eye = phase==='charge' ? (kind==='yeti' ? '#74c0fc' : '#ff9f1c') : L.eye;
+    c.save(); c.translate(cx,cy); c.scale(L.size, L.size);
+    c.fillStyle = L.robe;
+    if(kind==='yeti'){
+      c.strokeStyle='#a5c8e4'; c.lineWidth=1.5;
+      c.beginPath(); c.arc(0,S*.05,S*.38,0,7); c.fill(); c.stroke();
+      c.beginPath(); c.arc(-S*.36,S*.12,S*.12,0,7); c.arc(S*.36,S*.12,S*.12,0,7); c.fill(); c.stroke();
+      c.fillStyle='#74c0fc'; rr(c,-S*.2,-S*.16,S*.4,S*.26,S*.1); c.fill();
+      c.fillStyle=eye; c.beginPath(); c.arc(-S*.09,-S*.05,S*.05,0,7); c.arc(S*.09,-S*.05,S*.05,0,7); c.fill();
+      c.fillStyle='#fff'; c.fillRect(-S*.07,S*.03,S*.04,S*.05); c.fillRect(S*.03,S*.03,S*.04,S*.05);
+    } else if(kind==='golem'){
+      rr(c,-S*.36,-S*.36,S*.72,S*.76,S*.16); c.fill();
+      c.strokeStyle='#ff922b'; c.lineWidth=1.6;
+      c.beginPath(); c.moveTo(-S*.3,S*.18); c.lineTo(-S*.08,S*.05); c.lineTo(-S*.12,S*.3); c.moveTo(S*.3,-S*.28); c.lineTo(S*.12,-S*.18); c.lineTo(S*.22,S*.12); c.stroke();
+      c.fillStyle=eye; c.fillRect(-S*.17,-S*.12,S*.11,S*.06); c.fillRect(S*.06,-S*.12,S*.11,S*.06);
+    } else {
+      c.beginPath(); c.moveTo(-S*.34,S*.4); c.quadraticCurveTo(-S*.3,-S*.1,0,-S*.44); c.quadraticCurveTo(S*.3,-S*.1,S*.34,S*.4); c.closePath(); c.fill();
+      c.fillStyle=eye; c.beginPath(); c.arc(-S*.09,-S*.04,S*.055,0,7); c.arc(S*.09,-S*.04,S*.055,0,7); c.fill();
+    }
+    if(lvl >= 4){ const y0 = kind==='wizard' ? 0 : -S*.06; c.translate(0,y0); c.fillStyle='#fcc419';
+      c.beginPath(); c.moveTo(-S*.16,-S*.36); c.lineTo(-S*.16,-S*.52); c.lineTo(-S*.08,-S*.43); c.lineTo(0,-S*.56); c.lineTo(S*.08,-S*.43); c.lineTo(S*.16,-S*.52); c.lineTo(S*.16,-S*.36); c.closePath(); c.fill(); }
+    c.restore();
+  }
+  function minion(c, cx, cy, S, kind){
+    if(kind==='snowman'){
+      c.fillStyle='#fff'; c.strokeStyle='#a5c8e4'; c.lineWidth=1.4;
+      c.beginPath(); c.arc(cx,cy+S*.14,S*.25,0,7); c.fill(); c.stroke(); c.beginPath(); c.arc(cx,cy-S*.2,S*.18,0,7); c.fill(); c.stroke();
+      c.fillStyle='#212529'; c.beginPath(); c.arc(cx-S*.07,cy-S*.23,S*.035,0,7); c.arc(cx+S*.07,cy-S*.23,S*.035,0,7); c.fill();
+      c.fillStyle='#ff922b'; c.beginPath(); c.moveTo(cx,cy-S*.17); c.lineTo(cx+S*.16,cy-S*.14); c.lineTo(cx,cy-S*.12); c.fill(); return;
+    }
+    if(kind==='imp'){
+      c.fillStyle='#e8590c';
+      c.beginPath(); c.moveTo(cx-S*.24,cy-S*.12); c.lineTo(cx-S*.3,cy-S*.4); c.lineTo(cx-S*.08,cy-S*.26); c.fill();
+      c.beginPath(); c.moveTo(cx+S*.24,cy-S*.12); c.lineTo(cx+S*.3,cy-S*.4); c.lineTo(cx+S*.08,cy-S*.26); c.fill();
+      c.beginPath(); c.arc(cx,cy,S*.3,0,7); c.fill();
+      c.fillStyle='#ffd43b'; c.beginPath(); c.arc(cx-S*.1,cy-S*.04,S*.06,0,7); c.arc(cx+S*.1,cy-S*.04,S*.06,0,7); c.fill();
+      c.strokeStyle='#5c2b1f'; c.lineWidth=1.5; c.beginPath(); c.arc(cx,cy+S*.06,S*.1,.2,Math.PI-.2); c.stroke(); return;
+    }
+    c.fillStyle='#b8c4a0'; c.beginPath(); c.arc(cx,cy-S*.03,S*.33,0,7); c.fill(); c.fillRect(cx-S*.17,cy+S*.12,S*.34,S*.16);
+    c.fillStyle='#3a3f2f'; c.beginPath(); c.arc(cx-S*.12,cy-S*.05,S*.08,0,7); c.arc(cx+S*.12,cy-S*.05,S*.08,0,7); c.fill();
+    c.fillRect(cx-S*.1,cy+S*.17,S*.04,S*.09); c.fillRect(cx-S*.02,cy+S*.17,S*.04,S*.09); c.fillRect(cx+S*.06,cy+S*.17,S*.04,S*.09);
+  }
+  function fireball(c, cx, cy, S, a, b, dx){
+    for(let k=3;k>=1;k--){ c.globalAlpha=.18*(4-k); c.fillStyle=a; c.beginPath(); c.arc(cx-dx*k*S*.28,cy,S*(.26-k*.04),0,7); c.fill(); }
+    c.globalAlpha=1; c.fillStyle=a; c.beginPath(); c.arc(cx,cy,S*.3,0,7); c.fill(); c.fillStyle=b; c.beginPath(); c.arc(cx,cy,S*.15,0,7); c.fill();
+  }
+
+  function setup(cv){
+    const r = cv.getBoundingClientRect();
+    cv.width = Math.max(1, Math.round(r.width*dpr)); cv.height = Math.max(1, Math.round(r.height*dpr));
+    const c = cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
+    return { c, W:r.width, H:r.height };
+  }
+
+  // ---------- Ilustraciones estáticas ----------
+  const BOSS = {
+    pradera:{ kind:'wizard', minion:'zombie', shot:['#ff7a1a','#ffd166'], bg:'#fbfaf7', dot:'#e4e0d7', minionName:'Zombi',
+      lv:[ {name:'Brujo',hp:1,robe:'#3b2f63',eye:'#e0aaff',size:1,atk:'Una bola de fuego hacia ti'},
+           {name:'Brujo Oscuro',hp:1,robe:'#1a1a2e',eye:'#ff6b6b',size:1.05,atk:'Dos disparos y zombis más rápidos'},
+           {name:'Archibrujo',hp:2,robe:'#5a189a',eye:'#ffd166',size:1.12,atk:'Fuego en cruz, 4 direcciones'},
+           {name:'Rey Liche',hp:3,robe:'#212529',eye:'#63e6be',size:1.22,atk:'Cruz de fuego y un zombi extra'} ],
+      minionTxt:'Sale de una tumba, te persigue lento y muerde tu cuerpo. Se deshace solo después de un rato.' },
+    tundra:{ kind:'yeti', minion:'snowman', shot:['#74c0fc','#ffffff'], bg:'#f5f9fc', dot:'#d8e6f0', minionName:'Muñeco de nieve',
+      lv:[ {name:'Yeti',hp:1,robe:'#e7f5ff',eye:'#1971c2',size:1,atk:'Una bola de nieve hacia ti'},
+           {name:'Yeti Furioso',hp:1,robe:'#d0ebff',eye:'#e03131',size:1.06,atk:'Dos bolas de nieve a la vez'},
+           {name:'Yeti Ancestral',hp:2,robe:'#a5d8ff',eye:'#1864ab',size:1.14,atk:'Nieve en cruz, 4 direcciones'},
+           {name:'Rey de la Nieve',hp:3,robe:'#f8f9fa',eye:'#0b7285',size:1.24,atk:'Cruz de nieve y un muñeco extra'} ],
+      minionTxt:'Igual que un zombi pero más lento. En la Tundra todos los esbirros caminan con calma.' },
+    volcan:{ kind:'golem', minion:'imp', shot:['#e8590c','#ffa94d'], bg:'#fcf6f2', dot:'#efdccf', minionName:'Diablillo',
+      lv:[ {name:'Golem de Magma',hp:1,robe:'#6b3a2a',eye:'#ffd43b',size:1,atk:'Magma hacia ti, más seguido'},
+           {name:'Golem Ardiente',hp:1,robe:'#5c2b1f',eye:'#ff922b',size:1.06,atk:'Dos chorros de magma'},
+           {name:'Señor del Magma',hp:2,robe:'#4a1f14',eye:'#fff3bf',size:1.14,atk:'Magma en cruz, 4 direcciones'},
+           {name:'Rey Volcán',hp:3,robe:'#2b1410',eye:'#ff6b6b',size:1.24,atk:'Cruz de magma y un diablillo extra'} ],
+      minionTxt:'Rápido y con cuernos. Combinado con la lava, es el esbirro más peligroso.' },
+  };
+
+  const ART = {
+    apple(c,W,H){ const S=24; grid(c,W,H,S,'#fbfaf7','#e4e0d7'); const n=Math.floor(W/S);
+      const pts=[]; for(let i=0;i<Math.min(9,n-3);i++) pts.push([n-4-i, 2]); snake(c,pts,S,'1b4b5a','8fd3c4'); apple(c,n-2,2,S);
+      c.font='800 15px Figtree,sans-serif'; c.fillStyle='#2b8a3e'; c.textAlign='center'; c.fillText('+15', (n-2)*S+S/2, S*1.2); },
+    powers(c,W,H){ const S=26; grid(c,W,H,S,'#fbfaf7','#e4e0d7'); const cx = W/2/S;
+      [['#4c8bf5',-2.2],['#9b5de5',-.5],['#e5484d',1.2]].forEach(([col,o]) => apple(c, cx+o-.5, 1.6, S, col, true)); },
+    portals(c,W,H){ const S=26; grid(c,W,H,S,'#fbfaf7','#e4e0d7'); const n=Math.floor(W/S);
+      portal(c,1,1,S,'#f4a261',.4); portal(c,n-2,2,S,'#f4a261',1.2); portal(c,4,3,S,'#ff70a6',2);
+      c.fillStyle='#4a4e69'; [[n-5,1],[n-5,2]].forEach(([x,y]) => { rr(c,x*S+2,y*S+2,S-4,S-4,6); c.fill(); });
+      c.globalAlpha=.6; c.strokeStyle='#4a4e69'; c.setLineDash([3,3]); rr(c,(n-7)*S+3,3*S+3,S-6,S-6,5); c.stroke(); c.setLineDash([]); c.globalAlpha=1; },
+    scraps(c,W,H){ const S=24; grid(c,W,H,S,'#fbfaf7','#e4e0d7'); const pts=[[6,2],[5,2],[4,2],[3,2]]; snake(c,pts,S,'1b4b5a','8fd3c4');
+      [[7,3],[8,3],[9,3],[10,3],[11,3]].forEach(([x,y],i) => { const z=S*.48, cx=x*S+S/2, cy=y*S+S/2; c.fillStyle='#8fd3c4'; rr(c,cx-z/2,cy-z/2,z,z,z*.35); c.fill();
+        c.globalAlpha=.5; c.strokeStyle='#8fd3c4'; c.lineWidth=1.5; c.beginPath(); c.arc(cx,cy,S*.42,-1.57,-1.57+(1-i*.15)*6.28); c.stroke(); c.globalAlpha=1; });
+      c.font='800 14px Figtree,sans-serif'; c.fillStyle='#e5484d'; c.fillText('x1 ⬇', 7*S, S*1.2); },
+    retos(c,W,H){ c.fillStyle='#fbfaf7'; c.fillRect(0,0,W,H);
+      const rows=[['⭐','Haz 250 puntos',1,'✅'],['🍎','Come 15 manzanas',.6,'9/15'],['🌀','Cruza 4 portales',.25,'1/4']];
+      rows.forEach(([ic,t,k,p],i) => { const y=10+i*36, w=W-20; c.fillStyle= k===1?'#e6fcf5':'#fff'; c.strokeStyle= k===1?'#63e6be':'#e6e2da'; rr(c,10,y,w,30,9); c.fill(); c.stroke();
+        c.fillStyle='#2a9d8f'; rr(c,10,y+27,w*k,3,2); c.fill(); c.font='14px sans-serif'; c.fillText(ic,18,y+20);
+        c.font='600 13px Figtree,sans-serif'; c.fillStyle='#1f2933'; c.fillText(t,42,y+20); c.textAlign='right'; c.fillStyle=k===1?'#2a9d8f':'#8a8f98'; c.fillText(p,w+2,y+20); c.textAlign='left'; }); },
+    skins(c,W,H){ c.fillStyle='#fbfaf7'; c.fillRect(0,0,W,H); const S=18;
+      const sk=[['d9480f','ffc078'],['f72585','4cc9f0'],['e67700','ffe066']];
+      sk.forEach(([h,t],r) => { const pts=[]; for(let i=0;i<10;i++) pts.push([Math.floor(W/S)-2-i, 1.2+r*1.9 + (i%2?0:0)]);
+        if(r===1){ c.shadowBlur=10; c.shadowColor='#'+h; } snake(c,pts.map(p=>[p[0],p[1]]),S,h,t); c.shadowBlur=0;
+        if(r===0){ c.strokeStyle='#343a40'; c.globalAlpha=.6; c.lineWidth=2; for(let i=1;i<10;i+=2){ const x=pts[i][0]*S+S/2,y=pts[i][1]*S+S/2; c.beginPath(); c.moveTo(x,y-6); c.lineTo(x,y+6); c.stroke(); } c.globalAlpha=1; } }); },
+    stage0(c,W,H){ evoArt(c,W,H,'1b4b5a','8fd3c4',{}); },
+    stage1(c,W,H){ evoArt(c,W,H,'2b8a3e','b2f2bb',{shield:true}); },
+    stage2(c,W,H){ evoArt(c,W,H,'5f3dc4','d0bfff',{hood:true}); },
+    stage3(c,W,H){ evoArt(c,W,H,'c92a2a','ffd43b',{horns:true}); },
+    'b-pradera'(c,W,H){ biomeArt(c,W,H,'pradera'); },
+    'b-tundra'(c,W,H){ biomeArt(c,W,H,'tundra'); },
+    'b-volcan'(c,W,H){ biomeArt(c,W,H,'volcan'); },
+  };
+  function evoArt(c,W,H,h,t,opt){ const S=28; c.clearRect(0,0,W,H); const n=Math.floor(W/S), y=1.4;
+    const pts=[]; for(let i=0;i<Math.min(6,n-1);i++) pts.push([n-1.6-i, y + (i>2 ? 0 : 0)]); snake(c,pts,S,h,t,opt); }
+  function biomeArt(c,W,H,b){
+    const B = BOSS[b], S=26; grid(c,W,H,S,B.bg,B.dot); const n=Math.floor(W/S), m=Math.floor(H/S);
+    if(b==='tundra'){ [[1,1],[2,1],[3,1],[1,2],[2,2],[2,3],[n-4,4],[n-3,4],[n-3,5],[n-2,5]].forEach(([x,y]) => { c.fillStyle='rgba(165,216,255,.5)'; rr(c,x*S+1,y*S+1,S-2,S-2,6); c.fill(); c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=1.5; c.beginPath(); c.moveTo(x*S+S*.25,y*S+S*.7); c.lineTo(x*S+S*.6,y*S+S*.3); c.stroke(); });
+      c.fillStyle='#a5c8e4'; for(let i=0;i<26;i++){ c.globalAlpha=.6; c.beginPath(); c.arc((i*53)%W, (i*37)%H, 1.5+(i%3), 0, 7); c.fill(); } c.globalAlpha=1; }
+    if(b==='volcan'){ [[1,2],[2,2],[3,3]].forEach(([x,y]) => { c.fillStyle='#e8590c'; rr(c,x*S+1,y*S+1,S-2,S-2,6); c.fill(); c.fillStyle='#ffa94d'; c.beginPath(); c.arc(x*S+S*.35,y*S+S*.4,S*.12,0,7); c.fill(); });
+      [[n-4,1],[n-3,1],[n-2,2]].forEach(([x,y]) => { c.fillStyle='rgba(255,146,43,.35)'; rr(c,x*S+2,y*S+2,S-4,S-4,6); c.fill(); c.strokeStyle='#e8590c'; c.lineWidth=1.6; c.beginPath(); c.moveTo(x*S+S*.2,y*S+S*.3); c.lineTo(x*S+S*.45,y*S+S*.55); c.lineTo(x*S+S*.4,y*S+S*.75); c.stroke(); });
+      for(let i=0;i<20;i++){ c.fillStyle= i%2?'#ffa94d':'#ff8787'; c.globalAlpha=.7; c.beginPath(); c.arc((i*61)%W,(i*29)%H,1.6,0,7); c.fill(); } c.globalAlpha=1; }
+    if(b==='pradera'){ portal(c,1,1,S,'#f4a261',.3); portal(c,n-2,m-2,S,'#f4a261',1.4); apple(c,4,m-2,S); }
+    const pts=[]; for(let i=0;i<6;i++) pts.push([n-3-i, m-3]); snake(c,pts,S,'1b4b5a','8fd3c4');
+    boss(c, (n/2)*S, 2.2*S, S*1.2, B.kind, B.lv[0], 1, 'idle');
+    minion(c, 6.5*S, 4.5*S, S, B.minion);
+    fireball(c, (n/2-2.6)*S, 2.4*S, S, B.shot[0], B.shot[1], 1);
+  }
+  function drawAll(){
+    document.querySelectorAll('canvas[data-art]').forEach(cv => { const {c,W,H} = setup(cv); ART[cv.dataset.art](c,W,H); });
+    renderLadder(curFam);
+  }
+
+  // ---------- Escalera de jefes ----------
+  let curFam = 'pradera';
+  function renderLadder(fam){
+    curFam = fam;
+    const B = BOSS[fam], el = document.getElementById('ladder');
+    el.innerHTML = B.lv.map((L,i) => `<div class="lv"><canvas data-lv="${i}"></canvas><span class="n">NIVEL ${i+1}</span><h3>${L.name}</h3><span class="hp" aria-label="${L.hp} de vida">${'❤'.repeat(L.hp)}</span><p>${L.atk}</p></div>`).join('') +
+      `<div class="lv minion"><canvas data-min="1"></canvas><span class="n">ESBIRRO</span><h3 style="color:#fff">${B.minionName}</h3><p>${B.minionTxt}</p></div>`;
+    el.querySelectorAll('canvas[data-lv]').forEach(cv => { const {c,W,H} = setup(cv); const i=+cv.dataset.lv, S=36; grid(c,W,H,24,B.bg,B.dot); boss(c, W/2, H/2+6, S, B.kind, B.lv[i], i+1, i===2?'charge':'idle'); });
+    el.querySelectorAll('canvas[data-min]').forEach(cv => { const {c,W,H} = setup(cv); c.fillStyle='#2b3540'; c.fillRect(0,0,W,H); c.fillStyle='#3b4652'; for(let y=24;y<H;y+=24) for(let x=24;x<W;x+=24){ c.beginPath(); c.arc(x,y,1.1,0,7); c.fill(); } minion(c, W/2, H/2+4, 40, B.minion); });
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.fam===fam)));
+  }
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => renderLadder(t.dataset.fam)));
+
+  // ---------- Demo en vivo: la serpiente juega sola ----------
+  const demo = document.getElementById('demo');
+  const COLS = 16, ROWS = 12;
+  let D, S = 24, sn, dir, food, grow = 0, prev, score = 0, best = 640, ripples = [], pops = [], acc = 0, last = 0, t0 = performance.now();
+  const PORT = [[[2,2],[13,9]]];
+  function resetDemo(){ sn = [[6,6],[5,6],[4,6],[3,6]]; prev = sn.map(p=>p.slice()); dir=[1,0]; grow=0; score=0; placeFood(); }
+  function placeFood(){ for(let k=0;k<200;k++){ const f=[1+Math.floor(Math.random()*(COLS-2)), 1+Math.floor(Math.random()*(ROWS-2))]; if(!sn.some(p=>p[0]===f[0]&&p[1]===f[1]) && !PORT[0].some(p=>p[0]===f[0]&&p[1]===f[1])){ food=f; food.t=performance.now(); return; } } }
+  function free(x,y){ return x>=0&&y>=0&&x<COLS&&y<ROWS && !sn.slice(0,-1).some(p=>p[0]===x&&p[1]===y); }
+  function stepDemo(){
+    const h = sn[0], opts = [[1,0],[-1,0],[0,1],[0,-1]].filter(d => !(d[0]===-dir[0]&&d[1]===-dir[1]));
+    let bestD = null, bestScore = 1e9;
+    opts.forEach(d => { const nx=h[0]+d[0], ny=h[1]+d[1]; if(!free(nx,ny)) return;
+      let room=0; [[1,0],[-1,0],[0,1],[0,-1]].forEach(e=>{ if(free(nx+e[0],ny+e[1])) room++; });
+      const sc = Math.abs(nx-food[0])+Math.abs(ny-food[1]) - room*.6 + (d===dir?-.2:0); if(sc<bestScore){ bestScore=sc; bestD=d; } });
+    if(!bestD){ resetDemo(); return; }
+    dir = bestD; prev = sn.map(p=>p.slice());
+    let nx = h[0]+dir[0], ny = h[1]+dir[1];
+    const pi = PORT[0].findIndex(p=>p[0]===nx&&p[1]===ny);
+    if(pi>=0){ ripples.push({x:nx,y:ny,t:performance.now(),col:'#f4a261'}); const o = PORT[0][1-pi]; nx=o[0]; ny=o[1]; ripples.push({x:nx,y:ny,t:performance.now(),col:'#f4a261'}); }
+    sn.unshift([nx,ny]); if(grow>0) grow--; else sn.pop();
+    if(nx===food[0]&&ny===food[1]){ grow++; const m = Math.min(3, 1+.5*Math.floor(Math.max(0,sn.length-2)/6)); const pts = Math.round(10*m); score += pts; best = Math.max(best, score);
+      ripples.push({x:nx,y:ny,t:performance.now(),col:'#6cbf4a'}); pops.push({x:nx,y:ny,t:performance.now(),txt:'+'+pts}); placeFood();
+      document.getElementById('dScore').textContent = score; document.getElementById('dBest').textContent = best; document.getElementById('dMult').textContent = 'x'+m; }
+    if(sn.length > 22) resetDemo();
+  }
+  function drawDemo(now){
+    const {c,W,H} = D; S = W/COLS;
+    c.fillStyle='#fbfaf7'; c.fillRect(0,0,W,H);
+    c.fillStyle='#e4e0d7'; for(let y=1;y<ROWS;y++) for(let x=1;x<COLS;x++){ c.beginPath(); c.arc(x*S,y*S,1,0,7); c.fill(); }
+    ripples = ripples.filter(r => now - r.t < 700);
+    ripples.forEach(r => { const age=(now-r.t)/700, rad=age*7; c.fillStyle=r.col;
+      for(let y=1;y<ROWS;y++) for(let x=1;x<COLS;x++){ const d=Math.hypot(x-r.x-.5,y-r.y-.5), off=Math.abs(d-rad); if(off<1.2){ const k=(1-off/1.2)*(1-age); c.globalAlpha=.25+.6*k; c.beginPath(); c.arc(x*S,y*S,1+2.2*k,0,7); c.fill(); } } c.globalAlpha=1; });
+    PORT[0].forEach(p => portal(c,p[0],p[1],S,'#f4a261', now/500));
+    const pop = Math.min(1,(now-(food.t||0))/350); c.save(); const fx=food[0]*S+S/2, fy=food[1]*S+S/2; c.translate(fx,fy); c.scale(pop,pop); c.translate(-fx,-fy); apple(c,food[0],food[1],S); c.restore();
+    const t = RM ? 1 : Math.min(1, acc/140);
+    const pts = sn.map((p,i) => { const q = prev[i] || prev[prev.length-1]; if(Math.abs(q[0]-p[0])+Math.abs(q[1]-p[1])>1) return p; return [q[0]+(p[0]-q[0])*t, q[1]+(p[1]-q[1])*t]; });
+    if(pts.length>1 && Math.abs(pts[0][0]-pts[1][0])+Math.abs(pts[0][1]-pts[1][1])<.01) pts[1] = sn[1];
+    c.lineCap='round';
+    for(let i=pts.length-1;i>0;i--){ const a=pts[i], b=pts[i-1]; if(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>1.01) continue; const k=i/(pts.length-1);
+      c.strokeStyle=lerpHex('1b4b5a','8fd3c4',k); c.lineWidth=S*(.74-k*.22); c.beginPath(); c.moveTo(a[0]*S+S/2,a[1]*S+S/2); c.lineTo(b[0]*S+S/2,b[1]*S+S/2); c.stroke(); }
+    const hx=pts[0][0]*S+S/2, hy=pts[0][1]*S+S/2, dx=dir[0], dy=dir[1], qx=-dy, qy=dx;
+    c.fillStyle='#1b4b5a'; c.beginPath(); c.arc(hx,hy,S*.42,0,7); c.fill();
+    [-1,1].forEach(sd => { const ox=hx+dx*S*.12+qx*sd*S*.17, oy=hy+dy*S*.12+qy*sd*S*.17; c.fillStyle='#fff'; c.beginPath(); c.arc(ox,oy,S*.1,0,7); c.fill(); c.fillStyle='#111'; c.beginPath(); c.arc(ox+dx*S*.04,oy+dy*S*.04,S*.05,0,7); c.fill(); });
+    pops = pops.filter(p => now-p.t < 800);
+    pops.forEach(p => { const k=(now-p.t)/800; c.globalAlpha=1-k; c.font=`800 ${Math.max(12,S*.55)}px Figtree,sans-serif`; c.textAlign='center'; c.lineWidth=4; c.strokeStyle='#fbfaf7';
+      c.strokeText(p.txt,p.x*S+S/2,(p.y-k*1.2)*S); c.fillStyle='#2b8a3e'; c.fillText(p.txt,p.x*S+S/2,(p.y-k*1.2)*S); c.globalAlpha=1; });
+  }
+  function loop(now){
+    const dt = Math.min(60, now - (last||now)); last = now; acc += dt;
+    while(acc >= 140){ acc -= 140; stepDemo(); }
+    drawDemo(now);
+    requestAnimationFrame(loop);
+  }
+  function sizeDemo(){ D = setup(demo); }
+
+  resetDemo(); sizeDemo(); drawAll();
+  if(RM){ for(let i=0;i<14;i++) stepDemo(); drawDemo(performance.now()); }
+  else requestAnimationFrame(loop);
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { sizeDemo(); drawAll(); if(RM) drawDemo(performance.now()); }, 120); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+})();
+</script>
+</body>
+</html>
