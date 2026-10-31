@@ -194,6 +194,14 @@
   .touch .pc-only{display:none!important}
   .touch .cta.ph-only{display:flex!important}
   .sharebtn{cursor:pointer;font:inherit}
+  .mac-only{display:none!important}
+  .mac .mac-only{display:revert!important}
+  .mac .win-only{display:none!important}
+  .mac div.mac-only{display:flex!important}
+  .macbox{flex-direction:column;gap:8px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;font-size:15px;color:#4b5563}
+  .macbox b{color:var(--ink)}
+  .macbox ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+  .macbox small{color:var(--muted)}
   .touch nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--paper)}
   .touch .phone{grid-template-columns:1fr}
   @media (max-width: 900px){ .phone{grid-template-columns:1fr;padding:28px} .howto{grid-template-columns:1fr} }
@@ -288,9 +296,9 @@
       <p class="lead">Comes manzanas y creces, igual que siempre. Solo que ahora hay portales, poderes, cinco biomas, jefes que evolucionan cada vez que los vences y duelos contra tu amigo en el mismo teclado.</p>
       <div class="cta">
         <a class="btn primary" id="playTop" href="jugar/" style="background:#2a9d8f"><span class="ico" style="background:#1f2933">▶</span>Jugar ahora · sin instalar</a>
-        <a class="btn ghost" id="dlTop" href="#descargar"><span class="pc-only">💻 Descargar para Windows</span><span class="ph-only">📲 Instalar en tu teléfono</span></a>
+        <a class="btn ghost" id="dlTop" href="#descargar"><span class="pc-only win-only">💻 Descargar para Windows</span><span class="mac-only">🍎 Instalar en tu Mac</span><span class="ph-only">📲 Instalar en tu teléfono</span></a>
       </div>
-      <div class="meta"><span><i></i>Gratis</span><span><i></i>Se juega en el navegador</span><span><i></i>Windows, Android y iPhone</span><span><i></i>Online con amig@s</span></div>
+      <div class="meta"><span><i></i>Gratis</span><span><i></i>Se juega en el navegador</span><span><i></i>Windows, Mac, Android y iPhone</span><span><i></i>Online con amig@s</span></div>
     </div>
     <div class="stage">
       <div class="boardframe">
@@ -469,22 +477,31 @@
       <p class="kicker">En tu computadora</p>
       <h2 style="margin:10px 0 16px" class="pc-only">Juega aquí mismo o instálalo.</h2>
       <h2 style="margin:10px 0 16px" class="ph-only">¿Tienes compu? Juégalo en grande.</h2>
-      <p class="lead pc-only" style="font-size:17px"><b>Sin instalar:</b> dale a "Jugar ahora" y se abre en el navegador con teclado, la versión más nueva y modo online. <b>Instalado:</b> queda en tu escritorio y en el menú Inicio como cualquier juego.</p>
+      <p class="lead pc-only" style="font-size:17px"><b>Sin instalar:</b> dale a "Jugar ahora" y se abre en el navegador con teclado, la versión más nueva y modo online. <b>Instalado:</b> <span class="win-only">queda en tu escritorio y en el menú Inicio como cualquier juego.</span><span class="mac-only">queda en tu Dock y en Launchpad como cualquier app.</span></p>
       <p class="lead ph-only" style="font-size:17px">En la compu se juega con teclado, cabe un tablero más grande y pueden jugar 2 en el mismo teclado. Mándate el link y ábrelo allá.</p>
       <div class="cta ph-only" style="margin-top:22px"><button class="btn primary sharebtn" data-share="" style="background:#2a9d8f">📤 Mandarme el link a la compu</button></div>
       <div class="cta pc-only" style="margin-top:22px"><a class="btn primary" href="jugar/" style="background:#2a9d8f"><span class="ico" style="background:#1f2933">▶</span>Jugar sin instalar</a></div>
-      <div class="cta pc-only" style="margin-top:12px">
+      <div class="cta pc-only win-only" style="margin-top:12px">
         <a class="btn primary" id="dlMain" href="SnakeFlux-Instalador.exe" download><span class="ico"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v8M3.5 6 7 9.5 10.5 6M2 12.5h10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Descargar Snake Flux</a>
       </div>
-      <p class="req pc-only">SnakeFlux-Instalador.exe · 84 MB · Windows 10 u 11 de 64 bits · Versión 1.2 · con online, Arena, 5 biomas y Halloween</p>
+      <p class="req pc-only win-only">SnakeFlux-Instalador.exe · 84 MB · Windows 10 u 11 de 64 bits · Versión 1.2 · con online, Arena, 5 biomas y Halloween</p>
     </div>
     <div>
-      <ol class="steps pc-only">
+      <div class="macbox mac-only">
+        <b>🍎 ¿Tienes Mac?</b>
+        <span>No necesitas descargar nada: instálalo desde el navegador y queda en tu Dock como cualquier app.</span>
+        <ol>
+          <li><b>Safari:</b> abre "Jugar ahora" → menú <b>Archivo</b> → <b>Agregar al Dock…</b></li>
+          <li><b>Chrome:</b> abre "Jugar ahora" → ícono <b>⊕ Instalar</b> en la barra de dirección.</li>
+        </ol>
+        <small>Funciona en Mac con chip Apple (M1, M2…) y con Intel. Tus récords se guardan en tu Mac.</small>
+      </div>
+      <ol class="steps pc-only win-only">
         <li><b>Descarga el instalador</b>Se guarda en tu carpeta de Descargas.</li>
         <li><b>Ábrelo</b>Si Windows muestra "Windows protegió tu PC", da clic en <b style="display:inline">Más información</b> y luego en <b style="display:inline">Ejecutar de todas formas</b>. Sale porque es un juego independiente, sin firma de una empresa grande.</li>
         <li><b>Sigue los pasos y juega</b>Al terminar queda el ícono en tu escritorio. Para desinstalarlo: Configuración → Aplicaciones.</li>
       </ol>
-      <div class="safe pc-only"><span>🔒</span><span>Descarga solo desde esta página. Si un amigo te pasa el archivo por otro lado, pídele este link.</span></div>
+      <div class="safe pc-only win-only"><span>🔒</span><span>Descarga solo desde esta página. Si un amigo te pasa el archivo por otro lado, pídele este link.</span></div>
     </div>
   </div>
 </section>
@@ -492,7 +509,7 @@
 <footer>
   <div class="wrap">
     <span>Snake Flux · hecho por Gabriel Vera · 2026</span>
-    <span>Para Windows, Android y iPhone.</span>
+    <span>Para Windows, Mac, Android y iPhone.</span>
   </div>
 </footer>
 
@@ -505,6 +522,7 @@
 
   // En el teléfono: el botón principal abre el juego en el navegador
   const TOUCH = matchMedia('(pointer: coarse)').matches;
+  if(!TOUCH && /Macintosh|Mac OS X/.test(navigator.userAgent)) document.documentElement.classList.add('mac');
   if(TOUCH){
     document.documentElement.classList.add('touch');
     document.getElementById('dlTop').href = 'jugar/#instalar';
