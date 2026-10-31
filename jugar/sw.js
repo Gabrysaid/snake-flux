@@ -1,5 +1,5 @@
 // Snake Flux: abre al instante desde la memoria del teléfono y se actualiza sola.
-const CACHE = 'snakeflux-v5';
+const CACHE = 'snakeflux-v6';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))));
