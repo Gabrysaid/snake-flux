@@ -108,6 +108,7 @@
 
   /* ---------- biomas ---------- */
   .biomes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .newtag{font-size:11px;background:#e6fcf5;color:#2a9d8f;padding:2px 8px;border-radius:999px;vertical-align:3px}
   .biome{border-radius:24px;overflow:hidden;border:1px solid var(--line);background:#fff;display:flex;flex-direction:column}
   .biome canvas{width:100%;height:190px;display:block}
   .biome .bd{padding:20px;display:flex;flex-direction:column;gap:10px;flex:1}
@@ -276,7 +277,7 @@
   <div class="wrap">
     <div>
       <h1>Snake <span class="flux">Flux</span><span class="small">La de siempre. Pero ahora el mapa pelea contra ti.</span></h1>
-      <p class="lead">Comes manzanas y creces, igual que siempre. Solo que ahora hay portales, poderes, tres biomas, jefes que evolucionan cada vez que los vences y duelos contra tu amigo en el mismo teclado.</p>
+      <p class="lead">Comes manzanas y creces, igual que siempre. Solo que ahora hay portales, poderes, cinco biomas, jefes que evolucionan cada vez que los vences y duelos contra tu amigo en el mismo teclado.</p>
       <div class="cta">
         <a class="btn primary" id="dlTop" href="#descargar"><span class="ico"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v8M3.5 6 7 9.5 10.5 6M2 12.5h10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Descargar para Windows</a>
         <a class="btn ghost" href="#juego">Ver cómo se juega</a>
@@ -342,7 +343,7 @@
 <section class="block" id="biomas">
   <div class="wrap">
     <div class="head">
-      <div><p class="kicker">Biomas</p><h2>Tres mundos, tres maneras de morir.</h2></div>
+      <div><p class="kicker">Biomas</p><h2>Cinco mundos, cinco maneras de morir.</h2></div>
       <p class="lead">Eliges el bioma antes de jugar. Cada uno cambia una regla, trae su propio jefe y guarda su propio récord.</p>
     </div>
     <div class="biomes">
@@ -358,6 +359,16 @@
         <div class="row"><h3>🌋 Volcán</h3><span class="bonus">Puntos ×1.25</span></div>
         <ul><li>🔥<span><b>Grietas de lava</b> que se encienden por turnos. Brillan antes de quemar.</span></li><li>🪨<span>Jefe: <b>el Golem de Magma</b>, dispara más seguido</span></li><li>😈<span>Esbirros: <b>diablillos</b></span></li></ul>
         <div class="row"><span class="stars" aria-label="Dificultad 3 de 3">★★★</span><small style="color:var(--muted)">El más difícil</small></div>
+      </div></article>
+      <article class="biome"><canvas data-art="b-desierto"></canvas><div class="bd">
+        <div class="row"><h3>🏜️ Desierto <small class="newtag">Nuevo</small></h3><span class="bonus">Puntos ×1.25</span></div>
+        <ul><li>🌵<span><b>Cactus</b> fijos: si los tocas, pierdes.</span></li><li>🌪️<span><b>Tormentas de arena:</b> solo ves alrededor de tu cabeza.</span></li><li>👑<span>Jefe: <b>el Faraón</b> · Esbirros: <b>momias</b></span></li></ul>
+        <div class="row"><span class="stars" aria-label="Dificultad 3 de 3">★★★</span></div>
+      </div></article>
+      <article class="biome"><canvas data-art="b-arrecife"></canvas><div class="bd">
+        <div class="row"><h3>🌊 Arrecife <small class="newtag">Nuevo</small></h3><span class="bonus">Puntos ×1.1</span></div>
+        <ul><li>➡️<span><b>Corrientes marinas:</b> te arrastran y no puedes girar dentro.</span></li><li>🔱<span>Jefe: <b>la Bruja del Mar</b> · Esbirros: <b>ahogados</b></span></li></ul>
+        <div class="row"><span class="stars" aria-label="Dificultad 2 de 3">★★☆</span></div>
       </div></article>
     </div>
   </div>
@@ -581,6 +592,8 @@
 
   // ---------- Ilustraciones estáticas ----------
   const BOSS = {
+    desierto:{ kind:'wizard', minion:'zombie', shot:['#d9a441','#fff1c1'], bg:'#fcf8ef', dot:'#ecdcc0', lv:[ {name:'Faraón',hp:1,robe:'#b8862b',eye:'#4dabf7',size:1} ] },
+    arrecife:{ kind:'wizard', minion:'zombie', shot:['#15aabf','#c5f6fa'], bg:'#f3f9fb', dot:'#cfe6ee', lv:[ {name:'Bruja del Mar',hp:1,robe:'#0b7285',eye:'#c5f6fa',size:1} ] },
     pradera:{ kind:'wizard', minion:'zombie', shot:['#ff7a1a','#ffd166'], bg:'#fbfaf7', dot:'#e4e0d7', minionName:'Zombi',
       lv:[ {name:'Brujo',hp:1,robe:'#3b2f63',eye:'#e0aaff',size:1,atk:'Una bola de fuego hacia ti'},
            {name:'Brujo Oscuro',hp:1,robe:'#1a1a2e',eye:'#ff6b6b',size:1.05,atk:'Dos disparos y zombis más rápidos'},
@@ -632,6 +645,8 @@
     'b-pradera'(c,W,H){ biomeArt(c,W,H,'pradera'); },
     'b-tundra'(c,W,H){ biomeArt(c,W,H,'tundra'); },
     'b-volcan'(c,W,H){ biomeArt(c,W,H,'volcan'); },
+    'b-desierto'(c,W,H){ biomeArt(c,W,H,'desierto'); },
+    'b-arrecife'(c,W,H){ biomeArt(c,W,H,'arrecife'); },
   };
   function evoArt(c,W,H,h,t,opt){ const S = W < 220 ? 22 : 28; c.clearRect(0,0,W,H);
     const len = Math.min(6, Math.floor(W/S)-1), x0 = (W/S + len)/2 - 1, y = H/S/2 - .5;
@@ -643,6 +658,10 @@
     if(b==='volcan'){ [[1,2],[2,2],[3,3]].forEach(([x,y]) => { c.fillStyle='#e8590c'; rr(c,x*S+1,y*S+1,S-2,S-2,6); c.fill(); c.fillStyle='#ffa94d'; c.beginPath(); c.arc(x*S+S*.35,y*S+S*.4,S*.12,0,7); c.fill(); });
       [[n-4,1],[n-3,1],[n-2,2]].forEach(([x,y]) => { c.fillStyle='rgba(255,146,43,.35)'; rr(c,x*S+2,y*S+2,S-4,S-4,6); c.fill(); c.strokeStyle='#e8590c'; c.lineWidth=1.6; c.beginPath(); c.moveTo(x*S+S*.2,y*S+S*.3); c.lineTo(x*S+S*.45,y*S+S*.55); c.lineTo(x*S+S*.4,y*S+S*.75); c.stroke(); });
       for(let i=0;i<20;i++){ c.fillStyle= i%2?'#ffa94d':'#ff8787'; c.globalAlpha=.7; c.beginPath(); c.arc((i*61)%W,(i*29)%H,1.6,0,7); c.fill(); } c.globalAlpha=1; }
+    if(b==='desierto'){ [[1,1],[3,3],[n-2,1],[n-4,4]].forEach(([x,y]) => { const cx=x*S+S/2, cy=y*S+S/2; c.fillStyle='#2f9e44'; rr(c,cx-S*.12,cy-S*.38,S*.24,S*.76,S*.12); c.fill(); rr(c,cx-S*.36,cy-S*.12,S*.15,S*.3,S*.08); c.fill(); rr(c,cx-S*.36,cy+S*.06,S*.26,S*.12,S*.06); c.fill(); rr(c,cx+S*.21,cy-S*.26,S*.15,S*.3,S*.08); c.fill(); rr(c,cx+S*.1,cy-S*.08,S*.26,S*.12,S*.06); c.fill(); });
+      c.strokeStyle='rgba(217,164,65,.55)'; c.lineWidth=1.4; for(let i=0;i<14;i++){ const y=(i*41)%H, x=(i*83)%W; c.beginPath(); c.moveTo(x,y); c.lineTo(x+22,y+2); c.stroke(); } }
+    if(b==='arrecife'){ [[1,1,1],[2,1,1],[3,1,1],[4,1,1],[n-2,2,-1],[n-3,2,-1],[n-4,2,-1]].forEach(([x,y,d]) => { c.fillStyle='rgba(21,170,191,.2)'; rr(c,x*S+1,y*S+1,S-2,S-2,6); c.fill(); c.strokeStyle='#0c8599'; c.lineWidth=2; c.lineCap='round'; c.beginPath(); const cx=x*S+S/2, cy=y*S+S/2; c.moveTo(cx-d*S*.12,cy-S*.18); c.lineTo(cx+d*S*.08,cy); c.lineTo(cx-d*S*.12,cy+S*.18); c.stroke(); });
+      c.strokeStyle='#99e9f2'; for(let i=0;i<16;i++){ c.beginPath(); c.arc((i*61)%W,(i*43)%H,2+(i%3),0,7); c.stroke(); } }
     if(b==='pradera'){ portal(c,1,1,S,'#f4a261',.3); portal(c,n-2,m-2,S,'#f4a261',1.4); apple(c,4,m-2,S); }
     const pts=[]; for(let i=0;i<6;i++) pts.push([n-3-i, m-3]); snake(c,pts,S,'1b4b5a','8fd3c4');
     boss(c, (n/2)*S, 2.2*S, S*1.2, B.kind, B.lv[0], 1, 'idle');
