@@ -186,6 +186,9 @@
   #qr{width:200px;height:200px}
   #qr img,#qr canvas{width:200px!important;height:200px!important;image-rendering:pixelated}
   .touch .qrbox{display:none}
+  /* el botón "Jugar" de arriba solo aparece cuando ya no se ve el del inicio */
+  .navplay{opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s}
+  .navplay.show{opacity:1;pointer-events:auto;transform:none}
   .ph-only{display:none!important}
   .touch .ph-only{display:revert!important}
   .touch .pc-only{display:none!important}
@@ -274,7 +277,7 @@
     <div class="navlinks">
       <a href="#juego">El juego</a><a href="#biomas">Biomas</a><a href="#villanos">Villanos</a><a href="#modos">Modos</a><a href="#telefono">Teléfono</a>
     </div>
-    <a class="btn primary small" href="jugar/">▶ Jugar</a>
+    <a class="btn primary small navplay" href="jugar/">▶ Jugar</a>
   </div>
 </nav>
 
@@ -367,7 +370,7 @@
       </div></article>
       <article class="biome"><canvas data-art="b-desierto"></canvas><div class="bd">
         <div class="row"><h3>🏜️ Desierto <small class="newtag">Nuevo</small></h3><span class="bonus">Puntos ×1.25</span></div>
-        <ul><li>🌵<span><b>Cactus</b> fijos: si los tocas, pierdes.</span></li><li>🌪️<span><b>Tormentas de arena:</b> solo ves alrededor de tu cabeza.</span></li><li>👑<span>Jefe: <b>el Faraón</b> · Esbirros: <b>momias</b></span></li></ul>
+        <ul><li>🌵<span><b>Cactus</b> fijos: si los tocas, pierdes.</span></li><li>🌪️<span><b>Tormentas de arena:</b> solo ves alrededor de tu cabeza.</span></li><li>👑<span>Jefe: <b>el Faraón</b>, lanza arena</span></li><li>🧻<span>Esbirros: <b>momias</b></span></li></ul>
         <div class="row"><span class="stars" aria-label="Dificultad 3 de 3">★★★</span></div>
       </div></article>
       <article class="biome"><canvas data-art="b-arrecife"></canvas><div class="bd">
@@ -389,6 +392,9 @@
       <button class="tab" role="tab" aria-selected="true" data-fam="pradera" id="tab-pradera">🌿 Brujo</button>
       <button class="tab" role="tab" aria-selected="false" data-fam="tundra" id="tab-tundra">❄️ Yeti</button>
       <button class="tab" role="tab" aria-selected="false" data-fam="volcan" id="tab-volcan">🌋 Golem</button>
+      <button class="tab" role="tab" aria-selected="false" data-fam="desierto" id="tab-desierto">🏜️ Faraón</button>
+      <button class="tab" role="tab" aria-selected="false" data-fam="arrecife" id="tab-arrecife">🌊 Leviatán</button>
+      <button class="tab" role="tab" aria-selected="false" data-fam="cementerio" id="tab-cementerio">🎃 Halloween</button>
     </div>
     <div class="ladder" id="ladder"></div>
     <div class="rules">
@@ -511,6 +517,9 @@
     try { await navigator.clipboard.writeText(url); const t = b.textContent; b.textContent = '✅ Link copiado'; setTimeout(() => b.textContent = t, 1800); } catch(e){ prompt('Copia este link:', url); }
   }));
   document.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 8), { passive:true });
+  { const np = document.querySelector('.navplay'), hero = document.getElementById('playTop');
+    if('IntersectionObserver' in window) new IntersectionObserver(([e]) => np.classList.toggle('show', !e.isIntersecting), { rootMargin:'-70px 0px 0px 0px' }).observe(hero);
+    else np.classList.add('show'); }
 
   // ---------- Piezas de dibujo (mismo estilo que el juego) ----------
   function grid(c, W, H, S, bg, dot){
@@ -568,15 +577,55 @@
       c.strokeStyle='#ff922b'; c.lineWidth=1.6;
       c.beginPath(); c.moveTo(-S*.3,S*.18); c.lineTo(-S*.08,S*.05); c.lineTo(-S*.12,S*.3); c.moveTo(S*.3,-S*.28); c.lineTo(S*.12,-S*.18); c.lineTo(S*.22,S*.12); c.stroke();
       c.fillStyle=eye; c.fillRect(-S*.17,-S*.12,S*.11,S*.06); c.fillRect(S*.06,-S*.12,S*.11,S*.06);
+    } else if(kind==='pharaoh'){
+      c.beginPath(); c.moveTo(-S*.42,S*.42); c.lineTo(-S*.32,-S*.2); c.quadraticCurveTo(0,-S*.52,S*.32,-S*.2); c.lineTo(S*.42,S*.42); c.closePath(); c.fill();
+      c.strokeStyle='#1c4e80'; c.lineWidth=Math.max(1.4,S*.06);
+      for(let k=0;k<3;k++){ const y=-S*.05+k*S*.15; c.beginPath(); c.moveTo(-S*.36-k*S*.02,y); c.lineTo(-S*.24,y); c.moveTo(S*.24,y); c.lineTo(S*.36+k*S*.02,y); c.stroke(); }
+      c.fillStyle='#e8c07a'; c.beginPath(); c.ellipse(0,-S*.02,S*.2,S*.25,0,0,7); c.fill();
+      c.fillStyle='#1c4e80'; c.fillRect(-S*.24,-S*.24,S*.48,S*.06);
+      c.fillStyle='#ffd43b'; c.beginPath(); c.moveTo(0,-S*.4); c.lineTo(S*.06,-S*.28); c.lineTo(-S*.06,-S*.28); c.closePath(); c.fill();
+      c.fillStyle=eye; c.beginPath(); c.ellipse(-S*.08,-S*.06,S*.045,S*.03,0,0,7); c.ellipse(S*.08,-S*.06,S*.045,S*.03,0,0,7); c.fill();
+      c.fillStyle='#1c4e80'; c.fillRect(-S*.03,S*.18,S*.06,S*.14);
+    } else if(kind==='pumpkin'){
+      if(lvl >= 2){ c.fillStyle='#212529'; c.beginPath(); c.moveTo(-S*.42,S*.44); c.quadraticCurveTo(-S*.36,S*.02,0,S*.08); c.quadraticCurveTo(S*.36,S*.02,S*.42,S*.44); c.closePath(); c.fill(); }
+      c.fillStyle = L.robe==='#212529'||L.robe==='#1a1a2e' ? '#e8590c' : L.robe;
+      c.beginPath(); c.ellipse(-S*.14,-S*.08,S*.2,S*.3,0,0,7); c.ellipse(S*.14,-S*.08,S*.2,S*.3,0,0,7); c.fill();
+      c.fillStyle='#fd7e14'; c.beginPath(); c.ellipse(0,-S*.08,S*.18,S*.31,0,0,7); c.fill();
+      c.fillStyle='#2b8a3e'; c.fillRect(-S*.04,-S*.46,S*.08,S*.1);
+      c.fillStyle=eye; c.shadowColor=eye; c.shadowBlur=8;
+      [-1,1].forEach(sd => { c.beginPath(); c.moveTo(sd*S*.04,-S*.12); c.lineTo(sd*S*.18,-S*.12); c.lineTo(sd*S*.11,-S*.24); c.closePath(); c.fill(); });
+      c.beginPath(); c.moveTo(-S*.18,S*.02); c.lineTo(-S*.09,S*.1); c.lineTo(0,S*.03); c.lineTo(S*.09,S*.1); c.lineTo(S*.18,S*.02); c.lineTo(0,S*.08); c.closePath(); c.fill(); c.shadowBlur=0;
+    } else if(kind==='leviathan'){
+      const jaw = S*(phase==='charge' ? .5 : .3);
+      c.fillStyle='rgba(153,233,242,.6)'; c.beginPath(); c.ellipse(0,S*.5,S*1,S*.25,0,0,7); c.fill();
+      c.fillStyle=L.robe; c.beginPath(); c.moveTo(-S*.75,S*.12); c.quadraticCurveTo(0,S*.12+jaw*1.2,S*.75,S*.12); c.lineTo(S*.62,S*.04); c.quadraticCurveTo(0,S*.04+jaw*.8,-S*.62,S*.04); c.closePath(); c.fill();
+      c.fillStyle='#7a1f2b'; c.beginPath(); c.moveTo(-S*.6,S*.04); c.quadraticCurveTo(0,S*.04+jaw*.8,S*.6,S*.04); c.quadraticCurveTo(0,S*.04-jaw*.35,-S*.6,S*.04); c.fill();
+      c.fillStyle=L.robe; c.beginPath(); c.moveTo(-S*.75,S*.04); c.quadraticCurveTo(-S*.7,-S*.75-jaw*.3,0,-S*.75-jaw*.4); c.quadraticCurveTo(S*.7,-S*.75-jaw*.3,S*.75,S*.04); c.quadraticCurveTo(0,-jaw*.6,-S*.75,S*.04); c.fill();
+      c.fillStyle='#fff'; for(let i=-2;i<=2;i++){ const x=i*S*.2, yT=-jaw*.6*(1-Math.abs(i)/3)+S*.03; c.beginPath(); c.moveTo(x-S*.06,yT-S*.02); c.lineTo(x,yT+S*.13); c.lineTo(x+S*.06,yT-S*.02); c.fill();
+        const yB=S*.04+jaw*.75*(1-Math.abs(i)/3); c.beginPath(); c.moveTo(x-S*.05,yB+S*.02); c.lineTo(x,yB-S*.11); c.lineTo(x+S*.05,yB+S*.02); c.fill(); }
+      c.fillStyle=eye; c.beginPath(); c.ellipse(-S*.33,-S*.42-jaw*.3,S*.1,S*.06,-.3,0,7); c.ellipse(S*.33,-S*.42-jaw*.3,S*.1,S*.06,.3,0,7); c.fill();
+      c.fillStyle='#111'; c.beginPath(); c.arc(-S*.33,-S*.42-jaw*.3,S*.03,0,7); c.arc(S*.33,-S*.42-jaw*.3,S*.03,0,7); c.fill();
     } else {
       c.beginPath(); c.moveTo(-S*.34,S*.4); c.quadraticCurveTo(-S*.3,-S*.1,0,-S*.44); c.quadraticCurveTo(S*.3,-S*.1,S*.34,S*.4); c.closePath(); c.fill();
       c.fillStyle=eye; c.beginPath(); c.arc(-S*.09,-S*.04,S*.055,0,7); c.arc(S*.09,-S*.04,S*.055,0,7); c.fill();
     }
-    if(lvl >= 4){ const y0 = kind==='wizard' ? 0 : -S*.06; c.translate(0,y0); c.fillStyle='#fcc419';
+    if(lvl >= 4 && kind!=='leviathan'){ const y0 = kind==='wizard' ? 0 : kind==='pharaoh' ? -S*.12 : -S*.06; c.translate(0,y0); c.fillStyle='#fcc419';
       c.beginPath(); c.moveTo(-S*.16,-S*.36); c.lineTo(-S*.16,-S*.52); c.lineTo(-S*.08,-S*.43); c.lineTo(0,-S*.56); c.lineTo(S*.08,-S*.43); c.lineTo(S*.16,-S*.52); c.lineTo(S*.16,-S*.36); c.closePath(); c.fill(); }
     c.restore();
   }
   function minion(c, cx, cy, S, kind){
+    if(kind==='mummy'){
+      c.fillStyle='#efe3c4'; c.beginPath(); c.arc(cx,cy-S*.03,S*.31,0,7); c.fill(); c.fillRect(cx-S*.17,cy+S*.12,S*.34,S*.16);
+      c.strokeStyle='#c9b48a'; c.lineWidth=Math.max(1,S*.05);
+      [-.2,-.06,.1,.24].forEach((dy,i) => { c.beginPath(); c.moveTo(cx-S*.3,cy+dy*S+(i%2?S*.04:0)); c.lineTo(cx+S*.3,cy+dy*S-(i%2?0:S*.04)); c.stroke(); });
+      c.fillStyle='#1f2933'; c.fillRect(cx-S*.2,cy-S*.12,S*.4,S*.09);
+      c.fillStyle='#ffd43b'; c.beginPath(); c.arc(cx-S*.09,cy-S*.075,S*.035,0,7); c.arc(cx+S*.09,cy-S*.075,S*.035,0,7); c.fill(); return;
+    }
+    if(kind==='shadow'){
+      c.fillStyle='rgba(153,233,242,.18)'; rr(c,cx-S*1.3,cy-S*1.3,S*2.6,S*2.6,S*.7); c.fill();
+      c.strokeStyle='#e5484d'; c.lineWidth=2; c.setLineDash([6,5]); rr(c,cx-S*1.3,cy-S*1.3,S*2.6,S*2.6,S*.7); c.stroke(); c.setLineDash([]);
+      c.fillStyle='rgba(4,20,35,.55)'; c.beginPath(); c.ellipse(cx,cy,S*.95,S*.62,-.3,0,7); c.fill(); return;
+    }
     if(kind==='snowman'){
       c.fillStyle='#fff'; c.strokeStyle='#a5c8e4'; c.lineWidth=1.4;
       c.beginPath(); c.arc(cx,cy+S*.14,S*.25,0,7); c.fill(); c.stroke(); c.beginPath(); c.arc(cx,cy-S*.2,S*.18,0,7); c.fill(); c.stroke();
@@ -609,8 +658,24 @@
 
   // ---------- Ilustraciones estáticas ----------
   const BOSS = {
-    desierto:{ kind:'wizard', minion:'zombie', shot:['#d9a441','#fff1c1'], bg:'#fcf8ef', dot:'#ecdcc0', lv:[ {name:'Faraón',hp:1,robe:'#b8862b',eye:'#4dabf7',size:1} ] },
-    arrecife:{ kind:'wizard', minion:'zombie', shot:['#15aabf','#c5f6fa'], bg:'#f3f9fb', dot:'#cfe6ee', lv:[ {name:'Leviatán',hp:1,robe:'#1c7c8c',eye:'#ffe066',size:1} ] },
+    desierto:{ kind:'pharaoh', minion:'mummy', shot:['#d9a441','#fff1c1'], bg:'#fcf8ef', dot:'#ecdcc0', minionName:'Momia',
+      lv:[ {name:'Faraón',hp:1,robe:'#b8862b',eye:'#4dabf7',size:1,atk:'Lanza arena hacia ti'},
+           {name:'Faraón Maldito',hp:1,robe:'#8a5a19',eye:'#ff6b6b',size:1.06,atk:'Dos disparos de arena'},
+           {name:'Sumo Sacerdote',hp:2,robe:'#6b4513',eye:'#ffe066',size:1.14,atk:'Arena en cruz, 4 direcciones'},
+           {name:'Rey Escorpión',hp:3,robe:'#3d2a10',eye:'#69db7c',size:1.24,atk:'Cruz de arena y una momia extra'} ],
+      minionTxt:'Sale de un sarcófago y te persigue entre los cactus. Con tormenta de arena casi no se ve.' },
+    arrecife:{ kind:'leviathan', minion:'shadow', shot:['#15aabf','#c5f6fa'], bg:'#f3f9fb', dot:'#cfe6ee', minionName:'Su sombra',
+      lv:[ {name:'Leviatán',hp:1,robe:'#1c7c8c',eye:'#ffe066',size:1,atk:'Marca una sombra y muerde una vez'},
+           {name:'Leviatán Furioso',hp:1,robe:'#1864ab',eye:'#ff8787',size:1.06,atk:'Muerde más seguido'},
+           {name:'Leviatán Ancestral',hp:2,robe:'#364fc7',eye:'#ffd43b',size:1.14,atk:'Dos mordidas seguidas'},
+           {name:'Rey del Abismo',hp:3,robe:'#1b1f3b',eye:'#63e6be',size:1.24,atk:'Dos mordidas y menos aviso'} ],
+      minionTxt:'No tiene esbirros: antes de morder aparece una sombra con borde rojo justo donde vas a pasar. ¡Escúpele cuando asome!' },
+    cementerio:{ kind:'pumpkin', minion:'zombie', shot:['#ff922b','#ffe066'], bg:'#f6f3f9', dot:'#ddd3ea', minionName:'Zombi',
+      lv:[ {name:'Calabaza Maldita',hp:1,robe:'#d9480f',eye:'#ffe066',size:1,atk:'Fuego fatuo hacia ti'},
+           {name:'Jinete sin Cabeza',hp:1,robe:'#212529',eye:'#ff922b',size:1.06,atk:'Dos fuegos fatuos'},
+           {name:'Bruja de la Luna',hp:2,robe:'#5f3dc4',eye:'#b2f2bb',size:1.14,atk:'Fuego en cruz, 4 direcciones'},
+           {name:'Rey de Halloween',hp:3,robe:'#1a1a2e',eye:'#ff6b6b',size:1.24,atk:'Cruz de fuego y un zombi extra'} ],
+      minionTxt:'Solo durante Halloween. Además de los zombis, los fantasmas del Cementerio atraviesan todo.' },
     pradera:{ kind:'wizard', minion:'zombie', shot:['#ff7a1a','#ffd166'], bg:'#fbfaf7', dot:'#e4e0d7', minionName:'Zombi',
       lv:[ {name:'Brujo',hp:1,robe:'#3b2f63',eye:'#e0aaff',size:1,atk:'Una bola de fuego hacia ti'},
            {name:'Brujo Oscuro',hp:1,robe:'#1a1a2e',eye:'#ff6b6b',size:1.05,atk:'Dos disparos y zombis más rápidos'},
@@ -681,9 +746,9 @@
       c.strokeStyle='#99e9f2'; for(let i=0;i<16;i++){ c.beginPath(); c.arc((i*61)%W,(i*43)%H,2+(i%3),0,7); c.stroke(); } }
     if(b==='pradera'){ portal(c,1,1,S,'#f4a261',.3); portal(c,n-2,m-2,S,'#f4a261',1.4); apple(c,4,m-2,S); }
     const pts=[]; for(let i=0;i<6;i++) pts.push([n-3-i, m-3]); snake(c,pts,S,'1b4b5a','8fd3c4');
-    boss(c, (n/2)*S, 2.2*S, S*1.2, B.kind, B.lv[0], 1, 'idle');
-    minion(c, 6.5*S, 4.5*S, S, B.minion);
-    fireball(c, (n/2-2.6)*S, 2.4*S, S, B.shot[0], B.shot[1], 1);
+    boss(c, (n/2)*S, (B.kind==='leviathan' ? 3 : 2.2)*S, S*(B.kind==='leviathan' ? .9 : B.kind==='pharaoh'||B.kind==='pumpkin' ? 1.6 : 1.2), B.kind, B.lv[0], 1, B.kind==='leviathan' ? 'charge' : 'idle');
+    if(B.minion!=='shadow') minion(c, 6.5*S, 4.5*S, S, B.minion);
+    if(B.kind!=='leviathan') fireball(c, (n/2-2.6)*S, 2.4*S, S, B.shot[0], B.shot[1], 1);
   }
   function drawAll(){
     document.querySelectorAll('canvas[data-art]').forEach(cv => { const {c,W,H} = setup(cv); ART[cv.dataset.art](c,W,H); });
@@ -697,7 +762,7 @@
     const B = BOSS[fam], el = document.getElementById('ladder');
     el.innerHTML = B.lv.map((L,i) => `<div class="lv"><canvas data-lv="${i}"></canvas><span class="n">NIVEL ${i+1}</span><h3>${L.name}</h3><span class="hp" aria-label="${L.hp} de vida">${'❤'.repeat(L.hp)}</span><p>${L.atk}</p></div>`).join('') +
       `<div class="lv minion"><canvas data-min="1"></canvas><span class="n">ESBIRRO</span><h3 style="color:#fff">${B.minionName}</h3><p>${B.minionTxt}</p></div>`;
-    el.querySelectorAll('canvas[data-lv]').forEach(cv => { const {c,W,H} = setup(cv); const i=+cv.dataset.lv, S=36; grid(c,W,H,24,B.bg,B.dot); boss(c, W/2, H/2+6, S, B.kind, B.lv[i], i+1, i===2?'charge':'idle'); });
+    el.querySelectorAll('canvas[data-lv]').forEach(cv => { const {c,W,H} = setup(cv); const i=+cv.dataset.lv, S=36; grid(c,W,H,24,B.bg,B.dot); boss(c, W/2, H/2+6, S*(B.kind==='pharaoh'||B.kind==='pumpkin' ? 1.45 : 1), B.kind, B.lv[i], i+1, i===2?'charge':'idle'); });
     el.querySelectorAll('canvas[data-min]').forEach(cv => { const {c,W,H} = setup(cv); c.fillStyle='#2b3540'; c.fillRect(0,0,W,H); c.fillStyle='#3b4652'; for(let y=24;y<H;y+=24) for(let x=24;x<W;x+=24){ c.beginPath(); c.arc(x,y,1.1,0,7); c.fill(); } minion(c, W/2, H/2+4, 40, B.minion); });
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.fam===fam)));
   }
