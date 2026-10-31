@@ -369,16 +369,16 @@
       </div></article>
       <article class="biome"><canvas data-art="b-tundra"></canvas><div class="bd">
         <div class="row"><h3>❄️ Tundra</h3><span class="stars" aria-label="Dificultad 2 de 3">★★☆</span></div>
-        <ul><li>🧊<span><b>Hielo:</b> sobre él no puedes girar. Te deslizas hasta salir.</span></li><li>👣<span>Jefe: <b>el Yeti</b>, lanza bolas de nieve</span></li><li>⛄<span>Esbirros: <b>muñecos de nieve</b>, más lentos</span></li></ul>
+        <ul><li>🧊<span><b>Hielo:</b> sobre él no puedes girar. Te deslizas hasta salir.</span></li><li>👣<span>Jefe: <b>el Yeti</b>, embiste y deja hielo</span></li><li>⛄<span>Esbirros: <b>muñecos de nieve</b>, más lentos</span></li></ul>
       </div></article>
       <article class="biome"><canvas data-art="b-volcan"></canvas><div class="bd">
         <div class="row"><h3>🌋 Volcán</h3><span class="bonus">Puntos ×1.25</span></div>
-        <ul><li>🔥<span><b>Grietas de lava</b> que se encienden por turnos. Brillan antes de quemar.</span></li><li>🪨<span>Jefe: <b>el Golem de Magma</b>, dispara más seguido</span></li><li>😈<span>Esbirros: <b>diablillos</b></span></li></ul>
+        <ul><li>🔥<span><b>Grietas de lava</b> que se encienden por turnos. Brillan antes de quemar.</span></li><li>🪨<span>Jefe: <b>el Golem de Magma</b>, lluvia de meteoros</span></li><li>😈<span>Esbirros: <b>diablillos</b></span></li></ul>
         <div class="row"><span class="stars" aria-label="Dificultad 3 de 3">★★★</span><small style="color:var(--muted)">El más difícil</small></div>
       </div></article>
       <article class="biome"><canvas data-art="b-desierto"></canvas><div class="bd">
         <div class="row"><h3>🏜️ Desierto <small class="newtag">Nuevo</small></h3><span class="bonus">Puntos ×1.25</span></div>
-        <ul><li>🌵<span><b>Cactus</b> fijos: si los tocas, pierdes.</span></li><li>🌪️<span><b>Tormentas de arena:</b> solo ves alrededor de tu cabeza.</span></li><li>👑<span>Jefe: <b>el Faraón</b>, lanza arena</span></li><li>🧻<span>Esbirros: <b>momias</b></span></li></ul>
+        <ul><li>🌵<span><b>Cactus</b> fijos: si los tocas, pierdes.</span></li><li>🌪️<span><b>Tormentas de arena:</b> solo ves alrededor de tu cabeza.</span></li><li>👑<span>Jefe: <b>el Faraón</b>, arenas movedizas y tormentas</span></li><li>🧻<span>Esbirros: <b>momias</b></span></li></ul>
         <div class="row"><span class="stars" aria-label="Dificultad 3 de 3">★★★</span></div>
       </div></article>
       <article class="biome"><canvas data-art="b-arrecife"></canvas><div class="bd">
@@ -484,7 +484,7 @@
       <div class="cta pc-only win-only" style="margin-top:12px">
         <a class="btn primary" id="dlMain" href="SnakeFlux-Instalador.exe" download><span class="ico"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v8M3.5 6 7 9.5 10.5 6M2 12.5h10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Descargar Snake Flux</a>
       </div>
-      <p class="req pc-only win-only">SnakeFlux-Instalador.exe · 84 MB · Windows 10 u 11 de 64 bits · Versión 1.2 · con online, Arena, 5 biomas y Halloween</p>
+      <p class="req pc-only win-only">SnakeFlux-Instalador.exe · 84 MB · Windows 10 u 11 de 64 bits · Versión 1.3 · biomas desbloqueables, revivir y jefes nuevos</p>
     </div>
     <div>
       <div class="macbox mac-only">
@@ -677,10 +677,10 @@
   // ---------- Ilustraciones estáticas ----------
   const BOSS = {
     desierto:{ kind:'pharaoh', minion:'mummy', shot:['#d9a441','#fff1c1'], bg:'#fcf8ef', dot:'#ecdcc0', minionName:'Momia',
-      lv:[ {name:'Faraón',hp:1,robe:'#b8862b',eye:'#4dabf7',size:1,atk:'Lanza arena hacia ti'},
-           {name:'Faraón Maldito',hp:1,robe:'#8a5a19',eye:'#ff6b6b',size:1.06,atk:'Dos disparos de arena'},
-           {name:'Sumo Sacerdote',hp:2,robe:'#6b4513',eye:'#ffe066',size:1.14,atk:'Arena en cruz, 4 direcciones'},
-           {name:'Rey Escorpión',hp:3,robe:'#3d2a10',eye:'#69db7c',size:1.24,atk:'Cruz de arena y una momia extra'} ],
+      lv:[ {name:'Faraón',hp:1,robe:'#b8862b',eye:'#4dabf7',size:1,atk:'Arenas movedizas o tormenta de arena'},
+           {name:'Faraón Maldito',hp:1,robe:'#8a5a19',eye:'#ff6b6b',size:1.06,atk:'2 pozos de arena movediza'},
+           {name:'Sumo Sacerdote',hp:2,robe:'#6b4513',eye:'#ffe066',size:1.14,atk:'3 pozos y tormentas más seguidas'},
+           {name:'Rey Escorpión',hp:3,robe:'#3d2a10',eye:'#69db7c',size:1.24,atk:'3 pozos y una momia extra'} ],
       minionTxt:'Sale de un sarcófago y te persigue entre los cactus. Con tormenta de arena casi no se ve.' },
     arrecife:{ kind:'leviathan', minion:'shadow', shot:['#15aabf','#c5f6fa'], bg:'#f3f9fb', dot:'#cfe6ee', minionName:'Su sombra',
       lv:[ {name:'Leviatán',hp:1,robe:'#1c7c8c',eye:'#ffe066',size:1,atk:'Marca una sombra y muerde una vez'},
@@ -689,10 +689,10 @@
            {name:'Rey del Abismo',hp:3,robe:'#1b1f3b',eye:'#63e6be',size:1.24,atk:'Dos mordidas y menos aviso'} ],
       minionTxt:'No tiene esbirros: antes de morder aparece una sombra con borde rojo justo donde vas a pasar. ¡Escúpele cuando asome!' },
     cementerio:{ kind:'pumpkin', minion:'zombie', shot:['#ff922b','#ffe066'], bg:'#f6f3f9', dot:'#ddd3ea', minionName:'Zombi',
-      lv:[ {name:'Calabaza Maldita',hp:1,robe:'#d9480f',eye:'#ffe066',size:1,atk:'Fuego fatuo hacia ti'},
-           {name:'Jinete sin Cabeza',hp:1,robe:'#212529',eye:'#ff922b',size:1.06,atk:'Dos fuegos fatuos'},
-           {name:'Bruja de la Luna',hp:2,robe:'#5f3dc4',eye:'#b2f2bb',size:1.14,atk:'Fuego en cruz, 4 direcciones'},
-           {name:'Rey de Halloween',hp:3,robe:'#1a1a2e',eye:'#ff6b6b',size:1.24,atk:'Cruz de fuego y un zombi extra'} ],
+      lv:[ {name:'Calabaza Maldita',hp:1,robe:'#d9480f',eye:'#ffe066',size:1,atk:'Una calabaza que rebota por el mapa'},
+           {name:'Jinete sin Cabeza',hp:1,robe:'#212529',eye:'#ff922b',size:1.06,atk:'Dos calabazas rebotando'},
+           {name:'Bruja de la Luna',hp:2,robe:'#5f3dc4',eye:'#b2f2bb',size:1.14,atk:'Cuatro calabazas en diagonal'},
+           {name:'Rey de Halloween',hp:3,robe:'#1a1a2e',eye:'#ff6b6b',size:1.24,atk:'Cuatro calabazas y un zombi extra'} ],
       minionTxt:'Solo durante Halloween. Además de los zombis, los fantasmas del Cementerio atraviesan todo.' },
     pradera:{ kind:'wizard', minion:'zombie', shot:['#ff7a1a','#ffd166'], bg:'#fbfaf7', dot:'#e4e0d7', minionName:'Zombi',
       lv:[ {name:'Brujo',hp:1,robe:'#3b2f63',eye:'#e0aaff',size:1,atk:'Una bola de fuego hacia ti'},
@@ -701,16 +701,16 @@
            {name:'Rey Liche',hp:3,robe:'#212529',eye:'#63e6be',size:1.22,atk:'Cruz de fuego y un zombi extra'} ],
       minionTxt:'Sale de una tumba, te persigue lento y muerde tu cuerpo. Se deshace solo después de un rato.' },
     tundra:{ kind:'yeti', minion:'snowman', shot:['#74c0fc','#ffffff'], bg:'#f5f9fc', dot:'#d8e6f0', minionName:'Muñeco de nieve',
-      lv:[ {name:'Yeti',hp:1,robe:'#e7f5ff',eye:'#1971c2',size:1,atk:'Una bola de nieve hacia ti'},
-           {name:'Yeti Furioso',hp:1,robe:'#d0ebff',eye:'#e03131',size:1.06,atk:'Dos bolas de nieve a la vez'},
-           {name:'Yeti Ancestral',hp:2,robe:'#a5d8ff',eye:'#1864ab',size:1.14,atk:'Nieve en cruz, 4 direcciones'},
-           {name:'Rey de la Nieve',hp:3,robe:'#f8f9fa',eye:'#0b7285',size:1.24,atk:'Cruz de nieve y un muñeco extra'} ],
+      lv:[ {name:'Yeti',hp:1,robe:'#e7f5ff',eye:'#1971c2',size:1,atk:'Embiste en línea recta y deja hielo'},
+           {name:'Yeti Furioso',hp:1,robe:'#d0ebff',eye:'#e03131',size:1.06,atk:'Embestidas más seguidas'},
+           {name:'Yeti Ancestral',hp:2,robe:'#a5d8ff',eye:'#1864ab',size:1.14,atk:'Embiste y deja más hielo'},
+           {name:'Rey de la Nieve',hp:3,robe:'#f8f9fa',eye:'#0b7285',size:1.24,atk:'Embiste y trae un muñeco extra'} ],
       minionTxt:'Igual que un zombi pero más lento. En la Tundra todos los esbirros caminan con calma.' },
     volcan:{ kind:'golem', minion:'imp', shot:['#e8590c','#ffa94d'], bg:'#fcf6f2', dot:'#efdccf', minionName:'Diablillo',
-      lv:[ {name:'Golem de Magma',hp:1,robe:'#6b3a2a',eye:'#ffd43b',size:1,atk:'Magma hacia ti, más seguido'},
-           {name:'Golem Ardiente',hp:1,robe:'#5c2b1f',eye:'#ff922b',size:1.06,atk:'Dos chorros de magma'},
-           {name:'Señor del Magma',hp:2,robe:'#4a1f14',eye:'#fff3bf',size:1.14,atk:'Magma en cruz, 4 direcciones'},
-           {name:'Rey Volcán',hp:3,robe:'#2b1410',eye:'#ff6b6b',size:1.24,atk:'Cruz de magma y un diablillo extra'} ],
+      lv:[ {name:'Golem de Magma',hp:1,robe:'#6b3a2a',eye:'#ffd43b',size:1,atk:'Lluvia de 2 meteoros que dejan lava'},
+           {name:'Golem Ardiente',hp:1,robe:'#5c2b1f',eye:'#ff922b',size:1.06,atk:'3 meteoros a la vez'},
+           {name:'Señor del Magma',hp:2,robe:'#4a1f14',eye:'#fff3bf',size:1.14,atk:'4 meteoros a la vez'},
+           {name:'Rey Volcán',hp:3,robe:'#2b1410',eye:'#ff6b6b',size:1.24,atk:'4 meteoros y un diablillo extra'} ],
       minionTxt:'Rápido y con cuernos. Combinado con la lava, es el esbirro más peligroso.' },
   };
 
