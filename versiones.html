@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historial de versiones · Snake Flux</title>
+<meta name="description" content="Todas las versiones de Snake Flux: qué trajo cada actualización.">
+<link rel="icon" href="jugar/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#f3f1ec; --board:#fbfaf7; --ink:#1f2933; --muted:#6b7280; --line:#e6e2da; --teal:#2a9d8f; --dot:#e2ddd2;
+    --display:"Bricolage Grotesque", system-ui, sans-serif; --body:"Figtree", system-ui, sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{width:min(860px,92%);margin:0 auto}
+  nav{position:sticky;top:0;z-index:5;background:rgba(243,241,236,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-family:var(--display);font-weight:800;font-size:21px;text-decoration:none}
+  .logo span{color:var(--teal)}
+  .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;border-radius:12px;padding:10px 16px;background:var(--ink);color:#fff;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  header{padding:56px 0 24px}
+  .kicker{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+  h1{font-family:var(--display);font-size:clamp(38px,6vw,60px);line-height:1.02;letter-spacing:-.03em;margin:10px 0 12px}
+  .lead{color:#4b5563;font-size:18px;max-width:640px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .legend span{font-size:13px;font-weight:700;border-radius:999px;padding:4px 10px;background:#fff;border:1px solid var(--line)}
+  .t{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;margin-right:8px;vertical-align:1px;letter-spacing:.02em}
+  .t.new{background:#e6fcf5;color:#0ca678}
+  .t.chg{background:#e7f5ff;color:#1c7ed6}
+  .t.fix{background:#fff4e6;color:#e8590c}
+  .timeline{position:relative;padding:20px 0 80px}
+  .timeline::before{content:'';position:absolute;left:19px;top:30px;bottom:80px;width:3px;background:repeating-linear-gradient(var(--teal) 0 10px,transparent 10px 18px);border-radius:3px;opacity:.5}
+  .ver{position:relative;padding-left:58px;margin-bottom:34px}
+  .ver .dot{position:absolute;left:4px;top:18px;width:33px;height:33px;border-radius:50%;background:#fff;border:3px solid var(--teal);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .ver.latest .dot{background:var(--teal);box-shadow:0 0 0 6px rgba(42,157,143,.18)}
+  .card{background:var(--board);border:1px solid var(--line);border-radius:22px;padding:24px 26px;background-image:radial-gradient(var(--dot) 1px,transparent 1.2px);background-size:22px 22px}
+  .ver.latest .card{border-color:var(--teal);box-shadow:0 14px 40px rgba(31,41,51,.08)}
+  .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+  .num{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.02em}
+  .name{font-family:var(--display);font-weight:700;font-size:22px;color:var(--teal)}
+  .date{margin-left:auto;font-size:14px;color:var(--muted);font-weight:600}
+  .badge{font-size:12px;font-weight:800;background:var(--teal);color:#fff;border-radius:999px;padding:3px 10px}
+  .sum{color:#4b5563;margin:8px 0 14px}
+  .grp{margin-top:14px}
+  .grp h3{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .grp ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .grp li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:15.5px}
+  details summary{cursor:pointer;font-weight:700;color:var(--teal);margin-top:12px;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details[open] summary{margin-bottom:6px}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:14px}
+  @media (max-width:600px){ .ver{padding-left:46px} .ver .dot{width:28px;height:28px;font-size:13px;left:5px} .timeline::before{left:17px} .card{padding:18px} .date{margin-left:0;width:100%} .num{font-size:26px} .name{font-size:19px} }
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="./">Snake <span>Flux</span></a>
+  <a class="btn" href="jugar/">▶ Jugar</a>
+</div></nav>
+
+<header class="wrap">
+  <p class="kicker">Historial de versiones</p>
+  <h1>Así ha crecido Snake Flux.</h1>
+  <p class="lead">Cada actualización tiene su nombre. Aquí puedes ver qué trajo cada una y qué cambió respecto a la anterior.</p>
+  <div class="legend"><span><i class="t new">NUEVO</i>algo que antes no existía</span><span><i class="t chg">CAMBIO</i>algo que funciona distinto</span><span><i class="t fix">ARREGLO</i>un error corregido</span></div>
+</header>
+
+<main class="wrap timeline" id="list"></main>
+
+<footer><div class="wrap">Snake Flux · hecho por Gabriel Vera · 2026 · <a href="./">Volver al inicio</a></div></footer>
+
+<script>
+// Para agregar una versión nueva: ponla al principio de esta lista.
+const VERSIONS = [
+  { v:'1.3', name:'Llaves del Mundo', ic:'🔑', date:'31 de octubre de 2026',
+    sum:'Ahora cada mundo se gana. Cada bioma tiene su skin, su dragón y su jefe con ataques propios.',
+    items:[
+      ['new','<b>Biomas desbloqueables:</b> empiezas en Pradera y ganas 🔑 llaves juntando puntos. Tú eliges qué bioma abrir.'],
+      ['new','<b>Skin de regalo</b> al abrir cada bioma: ❄️ Glaciar, 🌋 Magma, 🏜️ Escarabajo y 🌊 Marea.'],
+      ['new','<b>Revivir con monedas</b> en 1 jugador. Cada vez cuesta el doble.'],
+      ['new','<b>Récord 💫 aparte</b> para las partidas en las que reviviste. Tu récord limpio no se toca.'],
+      ['new','<b>Un dragón por bioma:</b> de Hielo, de Magma, de Arena, Marino y Espectral, cada uno con su poder.'],
+      ['chg','<b>Yeti:</b> ahora embiste en línea recta y deja un camino de hielo.'],
+      ['chg','<b>Golem:</b> ahora hace llover meteoros que dejan lava unos segundos.'],
+      ['chg','<b>Faraón:</b> ahora crea arenas movedizas o invoca tormentas de arena.'],
+      ['chg','<b>Calabaza Maldita:</b> ahora lanza calabazas que rebotan por todo el mapa.'],
+      ['chg','Las skins de la tienda cuestan el triple. Las que ya tenías se quedan.'],
+      ['chg','La página ahora tiene historial de versiones (¡esta!).'],
+    ]},
+  { v:'1.2', name:'Conexión', ic:'🌐', date:'30 – 31 de octubre de 2026',
+    sum:'Snake Flux salió de la computadora: celular, online con amig@s, battle royale y el primer evento de temporada.',
+    items:[
+      ['new','<b>Versión para celular:</b> se juega en el navegador o se instala como app.'],
+      ['new','<b>Online</b> con código de sala: duelo y cooperativo entre teléfonos o compus.'],
+      ['new','<b>Arena:</b> battle royale de hasta 6, contra bots o con amig@s. La zona se cierra cada 12 s.'],
+      ['new','<b>Biomas nuevos:</b> 🏜️ Desierto (cactus y tormentas de arena) y 🌊 Arrecife (corrientes marinas).'],
+      ['new','<b>Leviatán:</b> el jefe del Arrecife marca una sombra y sale a morderte.'],
+      ['new','<b>Evento de Halloween:</b> bioma 🎃 Cementerio, calabazas coleccionables, 2 skins exclusivas y monedas ×2.'],
+      ['new','<b>Portales que se mueven</b> cada 20 s, con aviso (opcional).'],
+      ['new','<b>Comida de cada bioma:</b> moras, chile, tuna, pescadito y pan de muerto.'],
+      ['new','Se puede jugar en <b>Mac</b> y agregarlo al Dock.'],
+      ['new','<b>Faraón, momias y Calabaza Maldita</b> con su propio dibujo.'],
+      ['chg','La página ofrece "Jugar sin instalar" en compu y celular, y cada uno te invita a probar el otro.'],
+      ['fix','Las letras W, A, S, D y M ya se pueden escribir en el código de sala y en tu nombre.'],
+      ['fix','Los fantasmas ya no "saltan" hacia atrás al moverse.'],
+      ['fix','El menú ya no se corta en pantallas bajas.'],
+    ]},
+  { v:'1.1', name:'Mundos', ic:'🌋', date:'29 – 30 de octubre de 2026',
+    sum:'Llegaron los biomas, los jefes que evolucionan y una forma de jugar más ordenada.',
+    items:[
+      ['new','<b>Biomas:</b> 🌿 Pradera, ❄️ Tundra (hielo) y 🌋 Volcán (grietas de lava).'],
+      ['new','<b>Jefes con 4 niveles:</b> Brujo, Yeti y Golem. Cada vez que los vences, regresan más fuertes.'],
+      ['new','<b>Esbirros:</b> zombis, muñecos de nieve y diablillos.'],
+      ['new','<b>Retos por partida</b> y logros de bronce, plata y oro (algunos secretos).'],
+      ['new','<b>Pausa y guardado:</b> si cierras a media partida, se guarda sola.'],
+      ['new','Duelos de 2 jugadores por tiempo, por vidas o a muerte súbita.'],
+      ['chg','Menús separados: inicio, preparar partida, skins, logros y estadísticas.'],
+      ['chg','Más efectos visuales y animaciones, con el mismo estilo.'],
+    ]},
+  { v:'1.0', name:'Primera Mordida', ic:'🍎', date:'29 de octubre de 2026',
+    sum:'El Snake de siempre, pero con algo más.',
+    items:[
+      ['new','Come manzanas, crece y sube tu <b>multiplicador</b>.'],
+      ['new','<b>Portales</b> que te llevan al otro lado del mapa.'],
+      ['new','<b>Poderes:</b> lento, turbo y fantasma.'],
+      ['new','<b>Evolución:</b> Cría → Víbora (escudo) → Cobra (escupe veneno) → Dragón.'],
+      ['new','<b>Brujo y zombis</b> como primeros enemigos.'],
+      ['new','<b>2 jugadores</b> en el mismo teclado.'],
+      ['new','Skins, monedas y récords que se guardan en tu compu.'],
+      ['new','Instalador para <b>Windows</b>.'],
+    ]},
+];
+const TAG = { new:'NUEVO', chg:'CAMBIO', fix:'ARREGLO' };
+document.getElementById('list').innerHTML = VERSIONS.map((r,i) => {
+  const groups = ['new','chg','fix'].map(k => {
+    const its = r.items.filter(x => x[0]===k); if(!its.length) return '';
+    return `<div class="grp"><h3>${({new:'Lo nuevo',chg:'Cambios',fix:'Arreglos'})[k]}</h3><ul>${its.map(x => `<li><i class="t ${k}">${TAG[k]}</i>${x[1]}</li>`).join('')}</ul></div>`;
+  }).join('');
+  const body = i < 2 ? groups : `<details><summary>Ver todo lo que trajo (${r.items.length})</summary>${groups}</details>`;
+  return `<article class="ver ${i===0?'latest':''}" id="v${r.v}"><span class="dot">${r.ic}</span><div class="card">
+    <div class="top"><span class="num">v${r.v}</span><span class="name">${r.name}</span>${i===0?'<span class="badge">Actual</span>':''}<span class="date">${r.date}</span></div>
+    <p class="sum">${r.sum}</p>${body}</div></article>`;
+}).join('');
+</script>
+</body>
+</html>

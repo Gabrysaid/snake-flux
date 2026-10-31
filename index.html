@@ -186,6 +186,12 @@
   #qr{width:200px;height:200px}
   #qr img,#qr canvas{width:200px!important;height:200px!important;image-rendering:pixelated}
   .touch .qrbox{display:none}
+  .newsbox{margin:70px auto 0;display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:center;background:#fff;border:2px solid var(--teal);border-radius:28px;padding:34px;box-shadow:0 18px 50px rgba(31,41,51,.07)}
+  .newsbox h2{font-family:var(--display);font-size:clamp(28px,4vw,40px);letter-spacing:-.02em;margin:8px 0 10px;line-height:1.05}
+  .newsr{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .newsr li{display:flex;gap:12px;align-items:flex-start;background:var(--board);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:15.5px}
+  .newsr i{font-style:normal;font-size:20px}
+  @media (max-width:900px){ .newsbox{grid-template-columns:1fr;padding:24px 20px;margin-top:48px} }
   /* el botón "Jugar" de arriba solo aparece cuando ya no se ve el del inicio */
   .navplay{opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s}
   .navplay.show{opacity:1;pointer-events:auto;transform:none}
@@ -283,7 +289,7 @@
       Snake <em>Flux</em>
     </a>
     <div class="navlinks">
-      <a href="#juego">El juego</a><a href="#biomas">Biomas</a><a href="#villanos">Villanos</a><a href="#modos">Modos</a><a href="#telefono">Teléfono</a>
+      <a href="#novedades">Novedades</a><a href="#juego">El juego</a><a href="#biomas">Biomas</a><a href="#villanos">Villanos</a><a href="#modos">Modos</a><a href="#telefono">Teléfono</a>
     </div>
     <a class="btn primary small navplay" href="jugar/">▶ Jugar</a>
   </div>
@@ -324,6 +330,24 @@
   </div>
 </div>
 
+<section class="wrap" id="novedades">
+  <div class="newsbox">
+    <div class="newsl">
+      <p class="kicker">Novedades · versión actual</p>
+      <h2>v1.3 · Llaves del Mundo 🔑</h2>
+      <p class="lead" style="font-size:17px">Ahora cada mundo se gana. Cada bioma tiene su skin, su dragón y su jefe con ataques propios.</p>
+      <div class="cta" style="margin-top:16px"><a class="btn primary" href="versiones.html" style="background:#2a9d8f">📜 Ver historial de versiones</a></div>
+    </div>
+    <ul class="newsr">
+      <li><i>🔑</i><span><b>Biomas desbloqueables.</b> Ganas llaves con puntos y eliges qué mundo abrir.</span></li>
+      <li><i>🎨</i><span><b>Skin de regalo</b> con cada bioma: Glaciar, Magma, Escarabajo y Marea.</span></li>
+      <li><i>💫</i><span><b>Revivir con monedas.</b> Tu récord limpio queda aparte.</span></li>
+      <li><i>🐉</i><span><b>Un dragón por bioma</b>, cada uno con su propio poder.</span></li>
+      <li><i>👹</i><span><b>Jefes nuevos:</b> embestidas de hielo, meteoros, arenas movedizas y calabazas que rebotan.</span></li>
+    </ul>
+  </div>
+</section>
+
 <section class="block" id="juego">
   <div class="wrap">
     <div class="head">
@@ -360,7 +384,7 @@
   <div class="wrap">
     <div class="head">
       <div><p class="kicker">Biomas</p><h2>Cinco mundos, cinco maneras de morir.</h2></div>
-      <p class="lead">Eliges el bioma antes de jugar. Cada uno cambia una regla, trae su propio jefe y guarda su propio récord.</p>
+      <p class="lead">Empiezas en Pradera y abres los demás con 🔑 llaves que ganas jugando. Cada uno cambia una regla, trae su jefe, su dragón y su skin de regalo.</p>
     </div>
     <div class="biomes">
       <article class="biome"><canvas data-art="b-pradera"></canvas><div class="bd">
@@ -439,7 +463,9 @@
         <ul>
           <li>Tres dificultades: Fácil (los bordes te pasan al otro lado), Normal y Difícil.</li>
           <li>Récord separado por bioma, dificultad y con o sin enemigos.</li>
-          <li>27 logros de bronce, plata y oro. Cuatro son secretos.</li>
+          <li>37 logros de bronce, plata y oro. Cuatro son secretos.</li>
+          <li>Biomas que se abren con 🔑 llaves, y skins de regalo con cada uno.</li>
+          <li>💫 Revivir con monedas, con récord aparte para que el limpio siga valiendo.</li>
           <li>Estadísticas de todas tus partidas.</li>
           <li>Pausa con Esc. Si cierras a media partida, se guarda sola.</li>
         </ul>
@@ -509,7 +535,7 @@
 <footer>
   <div class="wrap">
     <span>Snake Flux · hecho por Gabriel Vera · 2026</span>
-    <span>Para Windows, Mac, Android y iPhone.</span>
+    <span><a href="versiones.html">Historial de versiones</a> · Versión 1.3 · Para Windows, Mac, Android y iPhone.</span>
   </div>
 </footer>
 
